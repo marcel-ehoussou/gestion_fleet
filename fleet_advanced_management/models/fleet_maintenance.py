@@ -121,6 +121,9 @@ class FleetMaintenanceServiceItem(models.Model):
 
     maintenance_id = fields.Many2one('fleet.vehicle.maintenance', 
                                     string='Maintenance Record')
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle',
+                                related='maintenance_id.vehicle_id',
+                                store=True)
     name = fields.Char(string='Service Item', required=True)
     product_id = fields.Many2one('product.product', string='Part')
     quantity = fields.Float(string='Quantity', default=1.0)

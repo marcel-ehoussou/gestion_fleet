@@ -4,3 +4,7 @@ from . import fleet_expense
 from . import fleet_maintenance
 from . import fleet_reservation
 from . import fleet_document
+from . import fleet_fuel_log
+from . import fleet_insurance
+from . import fleet_inspection
+from . import fleet_odometer
