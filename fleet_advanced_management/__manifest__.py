@@ -25,6 +25,7 @@
         'hr',
         'account',
         'mail',
+        'web',
     ],
     'data': [
         'security/fleet_security.xml',

@@ -1,4 +1,4 @@
-from odoo import models, fields, api, _
+from odoo import models, fields, api, tools, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
 
@@ -10,9 +10,19 @@ class FleetDriver(models.Model):
     name = fields.Char(string='Name', required=True, tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Related Employee')
     
-    # Image
-    image_1920 = fields.Image(string='Image')
-    image_128 = fields.Image(string='Image 128', related='image_1920', max_width=128, max_height=128, store=True)
+    # Image fields
+    image_1920 = fields.Binary(string='Image', attachment=True)
+    image_128 = fields.Binary("Image 128", compute='_compute_image_128', store=True)
+    
+    @api.model
+    def _get_image_128(self, image_1920):
+        """Resize the image to 128x128px"""
+        return tools.image_process(image_1920, size=(128, 128))
+    
+    @api.depends('image_1920')
+    def _compute_image_128(self):
+        for record in self:
+            record.image_128 = self._get_image_128(record.image_1920) if record.image_1920 else False
     license_number = fields.Char(string='License Number', required=True, tracking=True)
     license_type = fields.Selection([
         ('a', 'Type A'),
