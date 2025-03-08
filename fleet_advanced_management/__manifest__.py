@@ -1,6 +1,7 @@
 {
     'name': 'Fleet Advanced Management',
     'version': '1.0',
+    'sequence': -1,
     'category': 'Operations/Fleet',
     'summary': 'Advanced fleet management system with fuel tracking, maintenance, and driver management',
     'description': """

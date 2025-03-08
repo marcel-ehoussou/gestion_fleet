@@ -1,6 +1,7 @@
 {
     'name': 'Fleet Dashboard',
     'version': '1.0',
+    'sequence': -2,
     'category': 'Operations/Fleet',
     'summary': 'Advanced dashboards for fleet management',
     'description': """
