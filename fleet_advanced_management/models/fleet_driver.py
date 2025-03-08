@@ -1,44 +1,40 @@
-from odoo import models, fields, api, tools, _
+from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
-import base64
 
 class FleetDriver(models.Model):
     _name = 'fleet.driver'
     _description = 'Fleet Driver'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    ######################
+    # Basic Information #
+    ######################
     name = fields.Char(string='Name', required=True, tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Related Employee')
     
     # Image fields
-    image_1920 = fields.Binary(string='Image', attachment=True)
-    image_128 = fields.Binary("Image 128", compute='_compute_image_128', store=True)
+    image_1920 = fields.Image(string='Image')
+    image_128 = fields.Image(string='Image 128', related='image_1920', max_width=128, max_height=128, store=True)
     
-    @api.model
-    def _get_image_128(self, image_1920):
-        """Resize the image to 128x128px"""
-        return tools.image_process(image_1920, size=(128, 128))
-    
-    @api.depends('image_1920')
-    def _compute_image_128(self):
-        for record in self:
-            record.image_128 = self._get_image_128(record.image_1920) if record.image_1920 else False
+    # License Information
     license_number = fields.Char(string='License Number', required=True, tracking=True)
     license_type = fields.Selection([
         ('a', 'Type A'),
         ('b', 'Type B'),
         ('c', 'Type C'),
         ('d', 'Type D'),
-    ], string='License Type', required=True)
-    license_expiry = fields.Date(string='License Expiry Date', required=True)
+    ], string='License Type', required=True, tracking=True)
+    license_expiry = fields.Date(string='License Expiry Date', required=True, tracking=True)
     
     # Contact Information
-    phone = fields.Char(string='Phone')
-    email = fields.Char(string='Email')
-    address = fields.Text(string='Address')
+    phone = fields.Char(string='Phone', tracking=True)
+    email = fields.Char(string='Email', tracking=True)
+    address = fields.Text(string='Address', tracking=True)
     
-    # Status and Availability
+    ######################
+    # Status & Schedule #
+    ######################
     state = fields.Selection([
         ('available', 'Available'),
         ('driving', 'On Drive'),
@@ -46,33 +42,43 @@ class FleetDriver(models.Model):
         ('leave', 'On Leave'),
     ], string='Status', default='available', tracking=True)
     
-    # Assignments and Schedule
+    # Vehicle Assignment
     current_vehicle_id = fields.Many2one('fleet.vehicle', string='Current Vehicle',
-                                       compute='_compute_current_vehicle')
-    reservation_ids = fields.One2many('fleet.vehicle.reservation', 'driver_id',
-                                    string='Vehicle Reservations')
+                                       compute='_compute_current_vehicle', store=True)
+    
+    # Schedules and Reservations
     schedule_ids = fields.One2many('fleet.driver.schedule', 'driver_id',
                                  string='Work Schedule')
-    
-    # Performance Metrics
-    total_distance = fields.Float(string='Total Distance Driven',
-                                compute='_compute_total_distance')
-    fuel_efficiency_rating = fields.Float(string='Fuel Efficiency Rating',
-                                        compute='_compute_efficiency_rating')
-    accident_count = fields.Integer(string='Number of Accidents',
-                                  compute='_compute_accident_count')
     schedule_count = fields.Integer(string='Schedule Count',
-                                  compute='_compute_schedule_count')
+                                  compute='_compute_schedule_count', store=True)
     
-    # Documents
+    reservation_ids = fields.One2many('fleet.vehicle.reservation', 'driver_id',
+                                    string='Vehicle Reservations')
+    
+    ######################
+    # Performance Data  #
+    ######################
+    # Distance and Efficiency
+    total_distance = fields.Float(string='Total Distance Driven',
+                                compute='_compute_total_distance', store=True)
+    fuel_efficiency_rating = fields.Float(string='Fuel Efficiency Rating',
+                                        compute='_compute_efficiency_rating', store=True)
+    
+    # Safety and Performance
+    accident_count = fields.Integer(string='Number of Accidents',
+                                  compute='_compute_accident_count', store=True)
+    performance_score = fields.Float(string='Performance Score',
+                                   compute='_compute_performance_score', store=True)
+    
+    # Financial
+    revenue_generated = fields.Float(string='Total Revenue Generated',
+                                   compute='_compute_revenue', store=True)
+    
+    ######################
+    # Related Documents #
+    ######################
     document_ids = fields.One2many('fleet.driver.document', 'driver_id',
                                  string='Documents')
-    
-    # Analytics
-    revenue_generated = fields.Float(string='Total Revenue Generated',
-                                   compute='_compute_revenue')
-    performance_score = fields.Float(string='Performance Score',
-                                   compute='_compute_performance_score')
 
     @api.depends('reservation_ids')
     def _compute_current_vehicle(self):
