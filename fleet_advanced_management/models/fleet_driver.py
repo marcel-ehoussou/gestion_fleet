@@ -1,6 +1,7 @@
 from odoo import models, fields, api, tools, _
 from odoo.exceptions import UserError
 from datetime import datetime, timedelta
+import base64
 
 class FleetDriver(models.Model):
     _name = 'fleet.driver'
@@ -81,17 +82,51 @@ class FleetDriver(models.Model):
             )
             driver.current_vehicle_id = current_reservation.vehicle_id if current_reservation else False
 
-    @api.depends('reservation_ids')
+    @api.depends('reservation_ids.state', 'reservation_ids.end_odometer', 'reservation_ids.start_odometer')
     def _compute_total_distance(self):
         for driver in self:
-            # Calculate total distance driven from reservations and odometer logs
-            pass
+            total = 0.0
+            # Calculer la distance totale à partir des réservations terminées
+            completed_reservations = driver.reservation_ids.filtered(lambda r: r.state == 'done')
+            for reservation in completed_reservations:
+                if reservation.end_odometer and reservation.start_odometer:
+                    total += (reservation.end_odometer - reservation.start_odometer)
+            driver.total_distance = total
 
-    @api.depends('reservation_ids')
+    @api.depends('reservation_ids.state', 'reservation_ids.fuel_consumption', 'reservation_ids.distance_driven')
     def _compute_efficiency_rating(self):
         for driver in self:
-            # Calculate efficiency based on fuel consumption and driving patterns
-            pass
+            total_consumption = 0.0
+            total_distance = 0.0
+            completed_reservations = driver.reservation_ids.filtered(lambda r: r.state == 'done')
+            
+            for reservation in completed_reservations:
+                if reservation.fuel_consumption and reservation.distance_driven:
+                    total_consumption += reservation.fuel_consumption
+                    total_distance += reservation.distance_driven
+            
+            # Calculer l'efficacité en km/L
+            driver.fuel_efficiency_rating = (total_distance / total_consumption) if total_consumption else 0.0
+            
+    @api.depends('reservation_ids.state', 'reservation_ids.accident_count')
+    def _compute_accident_count(self):
+        for driver in self:
+            total_accidents = 0
+            completed_reservations = driver.reservation_ids.filtered(lambda r: r.state == 'done')
+            for reservation in completed_reservations:
+                if reservation.accident_count:
+                    total_accidents += reservation.accident_count
+            driver.accident_count = total_accidents
+            
+    @api.depends('reservation_ids.state', 'reservation_ids.total_cost')
+    def _compute_revenue(self):
+        for driver in self:
+            total_revenue = 0.0
+            completed_reservations = driver.reservation_ids.filtered(lambda r: r.state == 'done')
+            for reservation in completed_reservations:
+                if reservation.total_cost:
+                    total_revenue += reservation.total_cost
+            driver.revenue_generated = total_revenue
 
     @api.depends('total_distance', 'fuel_efficiency_rating', 'accident_count', 'revenue_generated')
     def _compute_performance_score(self):
