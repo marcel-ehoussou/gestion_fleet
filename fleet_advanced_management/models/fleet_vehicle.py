@@ -12,7 +12,7 @@ class FleetVehicle(models.Model):
     
     # Maintenance and Repairs
     maintenance_log_ids = fields.One2many('fleet.vehicle.maintenance', 'vehicle_id', string='Maintenance Logs')
-    next_maintenance_date = fields.Date(string='Next Maintenance Date', compute='_compute_next_maintenance')
+    next_maintenance_date = fields.Date(string='Next Maintenance Date', compute='_compute_next_maintenance', store=True)
     maintenance_cost_total = fields.Float(string='Total Maintenance Cost', compute='_compute_maintenance_cost')
     service_count = fields.Integer(string='Services', compute='_compute_service_count')
     service_activity = fields.Selection([
@@ -39,14 +39,14 @@ class FleetVehicle(models.Model):
     
     # Reservations
     reservation_ids = fields.One2many('fleet.vehicle.reservation', 'vehicle_id', string='Reservations')
-    is_available = fields.Boolean(string='Available', compute='_compute_availability')
+    is_available = fields.Boolean(string='Available', compute='_compute_availability', store=True)
     current_driver_id = fields.Many2one('fleet.driver', string='Current Driver',
                                       compute='_compute_current_driver')
     
     # Revenue Tracking
     revenue_ids = fields.One2many('fleet.vehicle.revenue', 'vehicle_id', string='Revenue Records')
     total_revenue = fields.Float(string='Total Revenue', compute='_compute_total_revenue')
-    profitability = fields.Float(string='Profitability (%)', compute='_compute_profitability')
+    profitability = fields.Float(string='Profitability (%)', compute='_compute_profitability', store=True)
     
     @api.depends('fuel_log_ids', 'odometer_log_ids')
     def _compute_fuel_efficiency(self):
@@ -62,7 +62,7 @@ class FleetVehicle(models.Model):
             else:
                 vehicle.fuel_efficiency = 0
             
-    @api.depends('maintenance_log_ids')
+    @api.depends('maintenance_log_ids', 'maintenance_log_ids.state', 'maintenance_log_ids.date')
     def _compute_next_maintenance(self):
         for vehicle in self:
             upcoming_maintenances = vehicle.maintenance_log_ids.filtered(
@@ -86,7 +86,7 @@ class FleetVehicle(models.Model):
             )
             vehicle.current_insurance_id = current_insurance[0] if current_insurance else False
             
-    @api.depends('reservation_ids')
+    @api.depends('reservation_ids', 'reservation_ids.state', 'reservation_ids.start_date', 'reservation_ids.end_date')
     def _compute_availability(self):
         now = fields.Datetime.now()
         for vehicle in self:
@@ -101,7 +101,7 @@ class FleetVehicle(models.Model):
             else:
                 vehicle.current_driver_id = False
             
-    @api.depends('revenue_ids', 'maintenance_cost_total')
+    @api.depends('revenue_ids', 'revenue_ids.amount', 'maintenance_cost_total', 'fuel_log_ids', 'fuel_log_ids.total_amount')
     def _compute_profitability(self):
         for vehicle in self:
             total_revenue = sum(vehicle.revenue_ids.mapped('amount'))
