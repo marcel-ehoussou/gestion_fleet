@@ -28,3 +28,6 @@ access_fleet_driver_schedule_manager,fleet.driver.schedule.manager,model_fleet_d
 
 access_fleet_driver_performance_report_user,fleet.driver.performance.report.user,model_fleet_driver_performance_report,group_fleet_user,1,1,1,0
 access_fleet_driver_performance_report_manager,fleet.driver.performance.report.manager,model_fleet_driver_performance_report,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_document_user,fleet.driver.document.user,model_fleet_driver_document,group_fleet_user,1,1,1,0
+access_fleet_driver_document_manager,fleet.driver.document.manager,model_fleet_driver_document,group_fleet_manager,1,1,1,1
