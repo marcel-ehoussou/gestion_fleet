@@ -20,7 +20,7 @@
                                     <field name="date"/>
                                     <field name="liters"/>
                                     <field name="price_per_liter"/>
-                                    <field name="total_cost"/>
+                                    <field name="total_amount"/>
                                     <field name="odometer"/>
                                 </tree>
                             </field>
@@ -37,7 +37,7 @@
                                     <field name="name"/>
                                     <field name="date"/>
                                     <field name="maintenance_type"/>
-                                    <field name="total_cost"/>
+                                    <field name="cost"/>
                                     <field name="state"/>
                                 </tree>
                             </field>
@@ -60,8 +60,9 @@
                             <field name="technical_inspection_ids">
                                 <tree>
                                     <field name="date"/>
-                                    <field name="result"/>
-                                    <field name="next_date"/>
+                                    <field name="inspection_type"/>
+                                    <field name="state"/>
+                                    <field name="next_inspection_date"/>
                                 </tree>
                             </field>
                         </page>
@@ -108,7 +109,7 @@
                                     <field name="daily_usage"/>
                                 </group>
                             </group>
-                            <button name="action_view_analytics" string="View Detailed Analytics" 
+                            <button name="action_report_analytics" string="View Detailed Analytics" 
                                     type="object" class="oe_highlight"/>
                         </page>
                     </notebook>
