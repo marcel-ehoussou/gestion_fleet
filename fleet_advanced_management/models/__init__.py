@@ -9,3 +9,5 @@ from . import fleet_insurance
 from . import fleet_inspection
 from . import fleet_odometer
 from . import fleet_revenue
+from . import fleet_schedule
+from . import fleet_driver_document
