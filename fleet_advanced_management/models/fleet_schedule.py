@@ -13,12 +13,15 @@ class FleetDriverSchedule(models.Model):
     driver_id = fields.Many2one('fleet.driver', string='Driver', required=True)
     
     # Schedule Period
-    start_datetime = fields.Datetime(string='Start Time', required=True)
-    end_datetime = fields.Datetime(string='End Time', required=True)
+    date = fields.Date(string='Date', required=True)
+    start_time = fields.Float(string='Start Time', required=True)
+    end_time = fields.Float(string='End Time', required=True)
+    start_datetime = fields.Datetime(string='Start DateTime', compute='_compute_datetime', store=True)
+    end_datetime = fields.Datetime(string='End DateTime', compute='_compute_datetime', store=True)
     duration = fields.Float(string='Duration (Hours)', compute='_compute_duration')
     
     # Schedule Type
-    schedule_type = fields.Selection([
+    assignment_type = fields.Selection([
         ('regular', 'Regular Shift'),
         ('overtime', 'Overtime'),
         ('on_call', 'On Call'),
@@ -55,13 +58,31 @@ class FleetDriverSchedule(models.Model):
             vals['name'] = self.env['ir.sequence'].next_by_code('fleet.driver.schedule') or _('New')
         return super(FleetDriverSchedule, self).create(vals)
 
-    @api.depends('start_datetime', 'end_datetime')
+    @api.depends('date', 'start_time', 'end_time')
+    def _compute_datetime(self):
+        for record in self:
+            if record.date:
+                # Convert float time to hours and minutes
+                start_hour = int(record.start_time)
+                start_minute = int((record.start_time % 1) * 60)
+                end_hour = int(record.end_time)
+                end_minute = int((record.end_time % 1) * 60)
+                
+                # Create datetime objects
+                record.start_datetime = fields.Datetime.to_string(
+                    datetime.combine(record.date,
+                                    datetime.min.time().replace(hour=start_hour,
+                                                               minute=start_minute)))
+                record.end_datetime = fields.Datetime.to_string(
+                    datetime.combine(record.date,
+                                    datetime.min.time().replace(hour=end_hour,
+                                                               minute=end_minute)))
+
+    @api.depends('start_time', 'end_time')
     def _compute_duration(self):
         for record in self:
-            if record.start_datetime and record.end_datetime:
-                duration = fields.Datetime.from_string(record.end_datetime) - \
-                          fields.Datetime.from_string(record.start_datetime)
-                record.duration = duration.total_seconds() / 3600
+            if record.start_time is not False and record.end_time is not False:
+                record.duration = record.end_time - record.start_time
             else:
                 record.duration = 0.0
 

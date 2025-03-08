@@ -22,3 +22,9 @@ access_fleet_document_manager,fleet.vehicle.document.manager,model_fleet_vehicle
 
 access_fleet_document_reminder_user,fleet.document.reminder.user,model_fleet_document_reminder,group_fleet_user,1,0,0,0
 access_fleet_document_reminder_manager,fleet.document.reminder.manager,model_fleet_document_reminder,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_schedule_user,fleet.driver.schedule.user,model_fleet_driver_schedule,group_fleet_user,1,1,1,0
+access_fleet_driver_schedule_manager,fleet.driver.schedule.manager,model_fleet_driver_schedule,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_performance_report_user,fleet.driver.performance.report.user,model_fleet_driver_performance_report,group_fleet_user,1,1,1,0
+access_fleet_driver_performance_report_manager,fleet.driver.performance.report.manager,model_fleet_driver_performance_report,group_fleet_manager,1,1,1,1
