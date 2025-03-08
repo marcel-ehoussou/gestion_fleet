@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Performance Report Form View -->
+        <record id="fleet_driver_performance_report_view_form" model="ir.ui.view">
+            <field name="name">fleet.driver.performance.report.form</field>
+            <field name="model">fleet.driver.performance.report</field>
+            <field name="arch" type="xml">
+                <form string="Driver Performance Report">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="driver_id" readonly="1"/>
+                            </h1>
+                            <h3>
+                                <field name="date" readonly="1"/>
+                            </h3>
+                        </div>
+                        <group>
+                            <group string="Performance Metrics">
+                                <field name="performance_score" widget="percentpie"/>
+                                <field name="total_distance"/>
+                                <field name="fuel_efficiency"/>
+                                <field name="accident_count"/>
+                                <field name="revenue"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Analysis" name="analysis">
+                                <group>
+                                    <group string="Strengths">
+                                        <field name="strengths" nolabel="1"/>
+                                    </group>
+                                    <group string="Areas for Improvement">
+                                        <field name="areas_for_improvement" nolabel="1"/>
+                                    </group>
+                                </group>
+                                <group string="Recommendations">
+                                    <field name="recommendations" nolabel="1"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <footer>
+                        <button name="action_print_report" string="Print Report" 
+                                type="object" class="btn-primary"/>
+                        <button special="cancel" string="Close" class="btn-secondary"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!-- Performance Report Search View -->
+        <record id="fleet_driver_performance_report_view_search" model="ir.ui.view">
+            <field name="name">fleet.driver.performance.report.search</field>
+            <field name="model">fleet.driver.performance.report</field>
+            <field name="arch" type="xml">
+                <search string="Search Performance Reports">
+                    <field name="driver_id"/>
+                    <field name="date"/>
+                    <separator/>
+                    <filter string="High Performance" name="high_performance" 
+                            domain="[('performance_score', '>=', 80)]"/>
+                    <filter string="Low Performance" name="low_performance" 
+                            domain="[('performance_score', '&lt;', 60)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Driver" name="group_by_driver" 
+                                context="{'group_by': 'driver_id'}"/>
+                        <filter string="Date" name="group_by_date" 
+                                context="{'group_by': 'date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Performance Report Action -->
+        <record id="action_fleet_driver_performance_report" model="ir.actions.act_window">
+            <field name="name">Driver Performance Reports</field>
+            <field name="res_model">fleet.driver.performance.report</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="context">{}</field>
+        </record>
+    </data>
+</odoo>

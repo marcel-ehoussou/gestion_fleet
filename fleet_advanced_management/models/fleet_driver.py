@@ -9,6 +9,10 @@ class FleetDriver(models.Model):
 
     name = fields.Char(string='Name', required=True, tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Related Employee')
+    
+    # Image
+    image_1920 = fields.Image(string='Image')
+    image_128 = fields.Image(string='Image 128', related='image_1920', max_width=128, max_height=128, store=True)
     license_number = fields.Char(string='License Number', required=True, tracking=True)
     license_type = fields.Selection([
         ('a', 'Type A'),
@@ -46,6 +50,8 @@ class FleetDriver(models.Model):
                                         compute='_compute_efficiency_rating')
     accident_count = fields.Integer(string='Number of Accidents',
                                   compute='_compute_accident_count')
+    schedule_count = fields.Integer(string='Schedule Count',
+                                  compute='_compute_schedule_count')
     
     # Documents
     document_ids = fields.One2many('fleet.driver.document', 'driver_id',
@@ -77,11 +83,29 @@ class FleetDriver(models.Model):
             # Calculate efficiency based on fuel consumption and driving patterns
             pass
 
-    @api.depends('performance_score', 'fuel_efficiency_rating')
+    @api.depends('total_distance', 'fuel_efficiency_rating', 'accident_count', 'revenue_generated')
     def _compute_performance_score(self):
         for driver in self:
-            # Calculate overall performance score
-            pass
+            # Base score starts at 100
+            score = 100.0
+            
+            # Reduce score based on accidents (each accident reduces 10 points)
+            score -= driver.accident_count * 10
+            
+            # Add points for fuel efficiency (0-20 points)
+            if driver.fuel_efficiency_rating:
+                score += min(driver.fuel_efficiency_rating * 2, 20)
+            
+            # Add points for experience/distance driven (0-20 points)
+            if driver.total_distance:
+                score += min(driver.total_distance / 1000, 20)  # 1 point per 1000 km, max 20 points
+            
+            # Add points for revenue generation (0-20 points)
+            if driver.revenue_generated:
+                score += min(driver.revenue_generated / 1000, 20)  # 1 point per 1000 currency units, max 20 points
+            
+            # Ensure score stays between 0 and 100
+            driver.performance_score = max(min(score, 100), 0)
 
     @api.constrains('license_expiry')
     def _check_license_validity(self):
@@ -97,13 +121,39 @@ class FleetDriver(models.Model):
         self.ensure_one()
         self.state = 'off_duty'
 
+    @api.depends('schedule_ids')
+    def _compute_schedule_count(self):
+        for driver in self:
+            driver.schedule_count = len(driver.schedule_ids)
+
     def action_view_schedule(self):
-        # Action to view driver's schedule
-        pass
+        self.ensure_one()
+        return {
+            'name': _('Work Schedule'),
+            'res_model': 'fleet.driver.schedule',
+            'view_mode': 'tree,form',
+            'domain': [('driver_id', '=', self.id)],
+            'context': {'default_driver_id': self.id},
+            'type': 'ir.actions.act_window',
+        }
 
     def action_view_performance_report(self):
-        # Action to view detailed performance report
-        pass
+        self.ensure_one()
+        return {
+            'name': _('Performance Report'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'fleet.driver.performance.report',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_driver_id': self.id,
+                'default_performance_score': self.performance_score,
+                'default_total_distance': self.total_distance,
+                'default_fuel_efficiency': self.fuel_efficiency_rating,
+                'default_accident_count': self.accident_count,
+                'default_revenue': self.revenue_generated,
+            }
+        }
 
     def action_send_reminder(self):
         # Action to send reminder about license renewal or other important dates

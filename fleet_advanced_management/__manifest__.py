@@ -31,6 +31,7 @@
         'security/ir.model.access.csv',
         'views/fleet_vehicle_views.xml',
         'views/fleet_driver_views.xml',
+        'views/fleet_driver_performance_views.xml',
         'views/fleet_expense_views.xml',
         'views/fleet_maintenance_views.xml',
         'views/fleet_reservation_views.xml',

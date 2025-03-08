@@ -11,3 +11,4 @@ from . import fleet_odometer
 from . import fleet_revenue
 from . import fleet_schedule
 from . import fleet_driver_document
+from . import fleet_driver_performance
