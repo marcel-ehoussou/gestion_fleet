@@ -8,6 +8,24 @@
             <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//sheet" position="inside">
+                    <div class="oe_button_box" name="button_box">
+                        <!-- Service Buttons -->
+                        <button name="return_action_to_open" type="object" 
+                                class="oe_stat_button text-danger" icon="fa-wrench"
+                                attrs="{'invisible': [('service_activity', '!=', 'overdue')]}">
+                            <field name="service_count" widget="statinfo" string="Services"/>
+                        </button>
+                        <button name="return_action_to_open" type="object" 
+                                class="oe_stat_button text-warning" icon="fa-wrench"
+                                attrs="{'invisible': [('service_activity', '!=', 'today')]}">
+                            <field name="service_count" widget="statinfo" string="Services"/>
+                        </button>
+                        <button name="return_action_to_open" type="object" 
+                                class="oe_stat_button" icon="fa-wrench"
+                                attrs="{'invisible': [('service_activity', 'not in', ['planned', 'none'])]}">
+                            <field name="service_count" widget="statinfo" string="Services"/>
+                        </button>
+                    </div>
                     <notebook>
                         <!-- Fuel Management -->
                         <page string="Fuel Management" name="fuel_management">
@@ -123,13 +141,13 @@
             <field name="model">fleet.vehicle</field>
             <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='name']" position="after">
+                <tree position="inside">
                     <field name="current_driver_id"/>
                     <field name="is_available"/>
                     <field name="next_maintenance_date"/>
                     <field name="maintenance_cost_total"/>
                     <field name="profitability"/>
-                </xpath>
+                </tree>
             </field>
         </record>
 
@@ -139,14 +157,14 @@
             <field name="model">fleet.vehicle</field>
             <field name="inherit_id" ref="fleet.fleet_vehicle_view_search"/>
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='name']" position="after">
+                <search position="inside">
                     <field name="current_driver_id"/>
                     <filter string="Available" name="available" domain="[('is_available', '=', True)]"/>
                     <filter string="Maintenance Due" name="maintenance_due" 
                             domain="[('next_maintenance_date', '&lt;=', context_today())]"/>
                     <filter string="High Profitability" name="high_profit" 
                             domain="[('profitability', '&gt;', 20)]"/>
-                </xpath>
+                </search>
             </field>
         </record>
 
@@ -156,7 +174,7 @@
             <field name="model">fleet.vehicle</field>
             <field name="inherit_id" ref="fleet.fleet_vehicle_view_kanban"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('o_kanban_record_bottom')]" position="inside">
+                <xpath expr="//div[contains(@class, 'o_kanban_record_bottom')]" position="inside">
                     <div class="oe_kanban_bottom_left">
                         <span class="badge badge-info" t-if="record.is_available.raw_value">Available</span>
                         <span class="badge badge-warning" t-if="!record.is_available.raw_value">In Use</span>
