@@ -1,0 +1,217 @@
+/* Fleet Dashboard Styles */
+
+/* Dashboard Header */
+.o_fleet_dashboard_header,
+.o_fleet_kpi_dashboard_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.o_fleet_dashboard_title,
+.o_fleet_kpi_dashboard_title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Dashboard Cards */
+.o_fleet_dashboard .card,
+.o_fleet_kpi_dashboard .card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.o_fleet_dashboard .card:hover,
+.o_fleet_kpi_dashboard .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.o_fleet_dashboard .card-header,
+.o_fleet_kpi_dashboard .card-header {
+    background-color: #fff;
+    border-bottom: 1px solid #e9ecef;
+    padding: 1rem;
+}
+
+.o_fleet_dashboard .card-body,
+.o_fleet_kpi_dashboard .card-body {
+    padding: 1.25rem;
+}
+
+/* Statistics Items */
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #212529;
+}
+
+/* KPI Cards */
+.o_fleet_kpi_dashboard .card {
+    height: 100%;
+}
+
+.o_fleet_kpi_dashboard .card.border-danger {
+    border-width: 2px;
+}
+
+.o_fleet_kpi_dashboard .card.border-warning {
+    border-width: 2px;
+}
+
+/* Charts */
+canvas.o_vehicle_status_chart,
+canvas.o_monthly_revenue_chart,
+canvas.o_maintenance_cost_chart,
+canvas.o_fuel_consumption_chart,
+canvas[class^="o_kpi_chart_"] {
+    width: 100% !important;
+    margin-top: 1rem;
+}
+
+/* Quick Actions */
+.o_fleet_dashboard_actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.o_fleet_dashboard_actions .btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.375rem;
+    font-weight: 500;
+}
+
+.o_fleet_dashboard_actions .btn i {
+    font-size: 1.125rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .o_fleet_dashboard_actions {
+        flex-direction: column;
+    }
+    
+    .o_fleet_dashboard_actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .stat-item {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Trends and Metrics */
+.trend-up {
+    color: #28a745;
+}
+
+.trend-down {
+    color: #dc3545;
+}
+
+/* Loading State */
+.o_fleet_dashboard.loading,
+.o_fleet_kpi_dashboard.loading {
+    position: relative;
+}
+
+.o_fleet_dashboard.loading::after,
+.o_fleet_kpi_dashboard.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.stat-value.highlight {
+    animation: pulse 1s ease-in-out;
+}
+
+/* Custom Scrollbar */
+.o_fleet_dashboard,
+.o_fleet_kpi_dashboard {
+    scrollbar-width: thin;
+    scrollbar-color: #6c757d #f8f9fa;
+}
+
+.o_fleet_dashboard::-webkit-scrollbar,
+.o_fleet_kpi_dashboard::-webkit-scrollbar {
+    width: 6px;
+}
+
+.o_fleet_dashboard::-webkit-scrollbar-track,
+.o_fleet_kpi_dashboard::-webkit-scrollbar-track {
+    background: #f8f9fa;
+}
+
+.o_fleet_dashboard::-webkit-scrollbar-thumb,
+.o_fleet_kpi_dashboard::-webkit-scrollbar-thumb {
+    background-color: #6c757d;
+    border-radius: 3px;
+}
+
+/* Print Styles */
+@media print {
+    .o_fleet_dashboard_actions,
+    .o_refresh_dashboard,
+    .o_refresh_kpis {
+        display: none !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    
+    .o_fleet_dashboard,
+    .o_fleet_kpi_dashboard {
+        width: 100% !important;
+        max-width: none !important;
+    }
+}

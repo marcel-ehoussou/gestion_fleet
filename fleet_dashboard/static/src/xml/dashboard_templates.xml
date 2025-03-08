@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Main Dashboard Template -->
+    <t t-name="FleetDashboardMain">
+        <div class="o_fleet_dashboard">
+            <!-- Header -->
+            <div class="o_fleet_dashboard_header">
+                <h1 class="o_fleet_dashboard_title">Fleet Management Dashboard</h1>
+                <button class="btn btn-primary o_refresh_dashboard">
+                    <i class="fa fa-refresh"/> Refresh
+                </button>
+            </div>
+
+            <!-- KPI Summary Cards -->
+            <div class="row mt-3">
+                <!-- Vehicle Status -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Vehicles</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h3 t-esc="dashboardData.total_vehicles"/>
+                                    <p>Total</p>
+                                </div>
+                                <div class="col-6">
+                                    <h3 t-esc="dashboardData.available_vehicles"/>
+                                    <p>Available</p>
+                                </div>
+                            </div>
+                            <canvas class="o_vehicle_status_chart" height="150"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Summary -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Revenue (MTD)</h5>
+                            <h3 t-esc="dashboardData.total_revenue_mtd"/>
+                            <p t-if="dashboardData.revenue_growth" t-attf-class="text-#{dashboardData.revenue_growth >= 0 ? 'success' : 'danger'}">
+                                <i t-attf-class="fa fa-arrow-#{dashboardData.revenue_growth >= 0 ? 'up' : 'down'}"/>
+                                <t t-esc="Math.abs(dashboardData.revenue_growth)"/>% vs Last Month
+                            </p>
+                            <canvas class="o_monthly_revenue_chart" height="150"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Status -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Maintenance</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <h3 t-esc="dashboardData.pending_maintenance"/>
+                                    <p>Pending</p>
+                                </div>
+                                <div class="col-6">
+                                    <h3 t-esc="dashboardData.ongoing_maintenance"/>
+                                    <p>Ongoing</p>
+                                </div>
+                            </div>
+                            <canvas class="o_maintenance_cost_chart" height="150"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fuel Consumption -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Fuel (MTD)</h5>
+                            <h3 t-esc="dashboardData.fuel_consumption_mtd"/>
+                            <p>Liters Consumed</p>
+                            <canvas class="o_fuel_consumption_chart" height="150"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Statistics -->
+            <div class="row mt-4">
+                <!-- Driver Status -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Driver Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="o_fleet_dashboard_driver_stats">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Total Drivers</span>
+                                            <span class="stat-value" t-esc="dashboardData.total_drivers"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Available</span>
+                                            <span class="stat-value" t-esc="dashboardData.available_drivers"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">On Duty</span>
+                                            <span class="stat-value" t-esc="dashboardData.on_duty_drivers"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Off Duty</span>
+                                            <span class="stat-value" t-esc="dashboardData.off_duty_drivers"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reservations -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Reservations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="o_fleet_dashboard_reservation_stats">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Active</span>
+                                            <span class="stat-value" t-esc="dashboardData.active_reservations"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Upcoming</span>
+                                            <span class="stat-value" t-esc="dashboardData.upcoming_reservations"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Completed (MTD)</span>
+                                            <span class="stat-value" t-esc="dashboardData.completed_reservations_mtd"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Documents</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="o_fleet_dashboard_document_stats">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Expired</span>
+                                            <span class="stat-value text-danger" t-esc="dashboardData.expired_documents"/>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item">
+                                            <span class="stat-label">Expiring Soon</span>
+                                            <span class="stat-value text-warning" t-esc="dashboardData.documents_expiring_soon"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Quick Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="o_fleet_dashboard_actions">
+                                <button class="btn btn-primary o_fleet_dashboard_action" name="fleet_advanced_management.action_fleet_vehicle">
+                                    <i class="fa fa-car"/> Vehicles
+                                </button>
+                                <button class="btn btn-info o_fleet_dashboard_action" name="fleet_advanced_management.action_fleet_driver">
+                                    <i class="fa fa-user"/> Drivers
+                                </button>
+                                <button class="btn btn-success o_fleet_dashboard_action" name="fleet_advanced_management.action_fleet_reservation">
+                                    <i class="fa fa-calendar"/> Reservations
+                                </button>
+                                <button class="btn btn-warning o_fleet_dashboard_action" name="fleet_advanced_management.action_fleet_maintenance">
+                                    <i class="fa fa-wrench"/> Maintenance
+                                </button>
+                                <button class="btn btn-danger o_fleet_dashboard_action" name="fleet_advanced_management.action_fleet_document">
+                                    <i class="fa fa-file"/> Documents
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <!-- KPI Dashboard Template -->
+    <t t-name="FleetKPIDashboard">
+        <div class="o_fleet_kpi_dashboard">
+            <!-- Header -->
+            <div class="o_fleet_kpi_dashboard_header">
+                <h1 class="o_fleet_kpi_dashboard_title">Fleet KPI Dashboard</h1>
+                <button class="btn btn-primary o_refresh_kpis">
+                    <i class="fa fa-refresh"/> Refresh
+                </button>
+            </div>
+
+            <!-- KPI Grid -->
+            <div class="row mt-3">
+                <t t-foreach="kpiData.kpis || []" t-as="kpi">
+                    <div t-attf-class="col-md-#{kpi.display_graph ? '6' : '3'}">
+                        <div t-attf-class="card #{kpi.status === 'critical' ? 'border-danger' : kpi.status === 'warning' ? 'border-warning' : ''}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title">
+                                        <i t-attf-class="#{kpi.icon} mr-2"/>
+                                        <t t-esc="kpi.name"/>
+                                    </h5>
+                                    <span t-attf-class="badge badge-#{kpi.status === 'critical' ? 'danger' : kpi.status === 'warning' ? 'warning' : 'success'}">
+                                        <t t-esc="kpi.status"/>
+                                    </span>
+                                </div>
+                                
+                                <div class="row mt-3">
+                                    <div class="col-6">
+                                        <h3 t-attf-style="color: #{kpi.color}">
+                                            <t t-esc="kpi.current_value"/>
+                                        </h3>
+                                        <p>Current Value</p>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <h3>
+                                            <t t-esc="kpi.target_value"/>
+                                        </h3>
+                                        <p>Target</p>
+                                    </div>
+                                </div>
+
+                                <div t-if="kpi.trend !== 0" class="mt-2">
+                                    <span t-attf-class="text-#{kpi.trend > 0 ? 'success' : 'danger'}">
+                                        <i t-attf-class="fa fa-arrow-#{kpi.trend > 0 ? 'up' : 'down'}"/>
+                                        <t t-esc="Math.abs(kpi.trend)"/>%
+                                    </span>
+                                    <span class="text-muted ml-1">vs Previous Period</span>
+                                </div>
+
+                                <t t-if="kpi.display_graph">
+                                    <canvas t-attf-class="o_kpi_chart_#{kpi.id} mt-3" height="200"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

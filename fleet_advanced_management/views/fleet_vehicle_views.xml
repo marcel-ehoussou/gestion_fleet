@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Vehicle Form View -->
+        <record id="fleet_vehicle_view_form" model="ir.ui.view">
+            <field name="name">fleet.vehicle.form</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <notebook>
+                        <!-- Fuel Management -->
+                        <page string="Fuel Management" name="fuel_management">
+                            <group>
+                                <field name="fuel_efficiency"/>
+                                <field name="last_fuel_cost"/>
+                            </group>
+                            <field name="fuel_log_ids">
+                                <tree editable="bottom">
+                                    <field name="date"/>
+                                    <field name="liters"/>
+                                    <field name="price_per_liter"/>
+                                    <field name="total_cost"/>
+                                    <field name="odometer"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Maintenance -->
+                        <page string="Maintenance" name="maintenance">
+                            <group>
+                                <field name="next_maintenance_date"/>
+                                <field name="maintenance_cost_total"/>
+                            </group>
+                            <field name="maintenance_log_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="maintenance_type"/>
+                                    <field name="total_cost"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Insurance & Inspections -->
+                        <page string="Insurance &amp; Inspections" name="insurance">
+                            <group>
+                                <field name="current_insurance_id"/>
+                            </group>
+                            <field name="insurance_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                            <separator string="Technical Inspections"/>
+                            <field name="technical_inspection_ids">
+                                <tree>
+                                    <field name="date"/>
+                                    <field name="result"/>
+                                    <field name="next_date"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Reservations -->
+                        <page string="Reservations" name="reservations">
+                            <group>
+                                <field name="is_available"/>
+                                <field name="current_driver_id"/>
+                            </group>
+                            <field name="reservation_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="driver_id"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Documents -->
+                        <page string="Documents" name="documents">
+                            <field name="document_ids">
+                                <tree>
+                                    <field name="name"/>
+                                    <field name="document_type"/>
+                                    <field name="issue_date"/>
+                                    <field name="expiry_date"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+
+                        <!-- Analytics -->
+                        <page string="Analytics" name="analytics">
+                            <group>
+                                <group>
+                                    <field name="total_revenue"/>
+                                    <field name="profitability"/>
+                                </group>
+                                <group>
+                                    <field name="last_odometer"/>
+                                    <field name="daily_usage"/>
+                                </group>
+                            </group>
+                            <button name="action_view_analytics" string="View Detailed Analytics" 
+                                    type="object" class="oe_highlight"/>
+                        </page>
+                    </notebook>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Vehicle Tree/List View -->
+        <record id="fleet_vehicle_view_tree" model="ir.ui.view">
+            <field name="name">fleet.vehicle.tree</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="current_driver_id"/>
+                    <field name="is_available"/>
+                    <field name="next_maintenance_date"/>
+                    <field name="maintenance_cost_total"/>
+                    <field name="profitability"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Vehicle Search View -->
+        <record id="fleet_vehicle_view_search" model="ir.ui.view">
+            <field name="name">fleet.vehicle.search</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_search"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="current_driver_id"/>
+                    <filter string="Available" name="available" domain="[('is_available', '=', True)]"/>
+                    <filter string="Maintenance Due" name="maintenance_due" 
+                            domain="[('next_maintenance_date', '&lt;=', context_today())]"/>
+                    <filter string="High Profitability" name="high_profit" 
+                            domain="[('profitability', '&gt;', 20)]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Vehicle Kanban View -->
+        <record id="fleet_vehicle_view_kanban" model="ir.ui.view">
+            <field name="name">fleet.vehicle.kanban</field>
+            <field name="model">fleet.vehicle</field>
+            <field name="inherit_id" ref="fleet.fleet_vehicle_view_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('o_kanban_record_bottom')]" position="inside">
+                    <div class="oe_kanban_bottom_left">
+                        <span class="badge badge-info" t-if="record.is_available.raw_value">Available</span>
+                        <span class="badge badge-warning" t-if="!record.is_available.raw_value">In Use</span>
+                    </div>
+                    <div class="oe_kanban_bottom_right">
+                        <span class="badge badge-danger" 
+                              t-if="record.next_maintenance_date.raw_value &lt;= context_today()">
+                            Maintenance Due
+                        </span>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Vehicle Dashboard Action -->
+        <record id="action_fleet_vehicle_dashboard" model="ir.actions.act_window">
+            <field name="name">Vehicle Dashboard</field>
+            <field name="res_model">fleet.vehicle</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{'search_default_available': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first vehicle
+                </p>
+                <p>
+                    Create and manage your fleet of vehicles, track maintenance,
+                    fuel costs, and schedule reservations.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_fleet_vehicle_root"
+                  name="Fleet Management"
+                  sequence="10"/>
+
+        <menuitem id="menu_fleet_vehicle_main"
+                  name="Vehicles"
+                  parent="menu_fleet_vehicle_root"
+                  action="action_fleet_vehicle_dashboard"
+                  sequence="10"/>
+    </data>
+</odoo>

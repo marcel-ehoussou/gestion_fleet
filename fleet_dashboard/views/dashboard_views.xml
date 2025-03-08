@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Dashboard Form View -->
+        <record id="fleet_dashboard_view_form" model="ir.ui.view">
+            <field name="name">fleet.dashboard.form</field>
+            <field name="model">fleet.dashboard</field>
+            <field name="arch" type="xml">
+                <form string="Fleet Dashboard">
+                    <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name"/>
+                            </h1>
+                        </div>
+                        <group>
+                            <field name="date"/>
+                        </group>
+                        <notebook>
+                            <page string="Vehicle Statistics" name="vehicle_stats">
+                                <group>
+                                    <group string="Vehicle Count">
+                                        <field name="total_vehicles"/>
+                                        <field name="available_vehicles"/>
+                                        <field name="in_maintenance_vehicles"/>
+                                        <field name="reserved_vehicles"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Maintenance" name="maintenance_stats">
+                                <group>
+                                    <group string="Maintenance Status">
+                                        <field name="pending_maintenance"/>
+                                        <field name="ongoing_maintenance"/>
+                                    </group>
+                                    <group string="Maintenance Costs">
+                                        <field name="maintenance_cost_mtd"/>
+                                        <field name="maintenance_cost_ytd"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Fuel Analytics" name="fuel_stats">
+                                <group>
+                                    <group string="Fuel Consumption">
+                                        <field name="fuel_consumption_mtd"/>
+                                        <field name="avg_fuel_efficiency"/>
+                                    </group>
+                                    <group string="Fuel Costs">
+                                        <field name="fuel_cost_mtd"/>
+                                        <field name="total_fuel_cost_ytd"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Driver Statistics" name="driver_stats">
+                                <group>
+                                    <group string="Driver Status">
+                                        <field name="total_drivers"/>
+                                        <field name="available_drivers"/>
+                                        <field name="on_duty_drivers"/>
+                                        <field name="off_duty_drivers"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Reservations" name="reservation_stats">
+                                <group>
+                                    <group string="Reservation Status">
+                                        <field name="active_reservations"/>
+                                        <field name="upcoming_reservations"/>
+                                        <field name="completed_reservations_mtd"/>
+                                    </group>
+                                    <group string="Revenue">
+                                        <field name="reservation_revenue_mtd"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Documents" name="document_stats">
+                                <group>
+                                    <group string="Document Status">
+                                        <field name="expired_documents"/>
+                                        <field name="documents_expiring_soon"/>
+                                        <field name="expiring_documents"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Financial Overview" name="financial_stats">
+                                <group>
+                                    <group string="Monthly Performance">
+                                        <field name="total_revenue_mtd"/>
+                                        <field name="total_expenses_mtd"/>
+                                        <field name="profit_mtd"/>
+                                        <field name="profit_margin"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Dashboard Tree View -->
+        <record id="fleet_dashboard_view_tree" model="ir.ui.view">
+            <field name="name">fleet.dashboard.tree</field>
+            <field name="model">fleet.dashboard</field>
+            <field name="arch" type="xml">
+                <tree string="Dashboards">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="total_vehicles"/>
+                    <field name="active_reservations"/>
+                    <field name="total_revenue_mtd"/>
+                    <field name="profit_mtd"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Dashboard Search View -->
+        <record id="fleet_dashboard_view_search" model="ir.ui.view">
+            <field name="name">fleet.dashboard.search</field>
+            <field name="model">fleet.dashboard</field>
+            <field name="arch" type="xml">
+                <search string="Search Dashboards">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <filter string="Today" name="today" 
+                            domain="[('date', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                    <filter string="This Month" name="this_month" 
+                            domain="[('date', '&gt;=', context_today().replace(day=1).strftime('%Y-%m-%d'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Date" name="group_by_date" context="{'group_by': 'date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Dashboard Kanban View -->
+        <record id="fleet_dashboard_view_kanban" model="ir.ui.view">
+            <field name="name">fleet.dashboard.kanban</field>
+            <field name="model">fleet.dashboard</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_dashboard">
+                    <field name="name"/>
+                    <field name="date"/>
+                    <field name="total_vehicles"/>
+                    <field name="available_vehicles"/>
+                    <field name="active_reservations"/>
+                    <field name="total_revenue_mtd"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click">
+                                <div class="oe_kanban_details">
+                                    <strong class="o_kanban_record_title">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_record_subtitle">
+                                        <field name="date"/>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Vehicles:</strong>
+                                            <field name="total_vehicles"/>
+                                            (<field name="available_vehicles"/> available)
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Active Reservations:</strong>
+                                            <field name="active_reservations"/>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-12">
+                                            <strong>Revenue (MTD):</strong>
+                                            <field name="total_revenue_mtd" widget="monetary"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Dashboard Action -->
+        <record id="action_fleet_dashboard" model="ir.actions.act_window">
+            <field name="name">Fleet Dashboard</field>
+            <field name="res_model">fleet.dashboard</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="context">{'search_default_today': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first dashboard
+                </p>
+                <p>
+                    Track and analyze your fleet performance with comprehensive dashboards
+                    showing vehicle statistics, maintenance data, fuel consumption,
+                    and financial metrics.
+                </p>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_fleet_dashboard_root"
+                  name="Fleet Dashboard"
+                  web_icon="fleet_dashboard,static/description/icon.png"
+                  sequence="10"/>
+
+        <menuitem id="menu_fleet_dashboard_main"
+                  name="Dashboards"
+                  parent="menu_fleet_dashboard_root"
+                  action="action_fleet_dashboard"
+                  sequence="1"/>
+    </data>
+</odoo>

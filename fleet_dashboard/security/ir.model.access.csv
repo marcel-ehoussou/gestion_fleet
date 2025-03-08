@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_fleet_dashboard_user,fleet.dashboard.user,model_fleet_dashboard,group_fleet_dashboard_user,1,0,0,0
+access_fleet_dashboard_manager,fleet.dashboard.manager,model_fleet_dashboard,group_fleet_dashboard_manager,1,1,1,1
+access_fleet_kpi_user,fleet.kpi.user,model_fleet_kpi,group_fleet_dashboard_user,1,0,0,0
+access_fleet_kpi_manager,fleet.kpi.manager,model_fleet_kpi,group_fleet_dashboard_manager,1,1,1,1
