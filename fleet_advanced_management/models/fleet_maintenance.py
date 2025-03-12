@@ -4,67 +4,67 @@ from datetime import datetime, timedelta
 
 class FleetMaintenance(models.Model):
     _name = 'fleet.vehicle.maintenance'
-    _description = 'Vehicle Maintenance'
+    _description = 'Maintenance du véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
-    date = fields.Date(string='Maintenance Date', required=True, default=fields.Date.context_today)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
+    date = fields.Date(string='Date de maintenance', required=True, default=fields.Date.context_today)
     
     maintenance_type = fields.Selection([
-        ('preventive', 'Preventive'),
+        ('preventive', 'Préventive'),
         ('corrective', 'Corrective'),
-        ('predictive', 'Predictive'),
-        ('diagnostic', 'Diagnostic'),
-    ], string='Maintenance Type', required=True)
+        ('predictive', 'Prédictive'),
+        ('diagnostic', 'Diagnostique'),
+    ], string='Type de maintenance', required=True)
     
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('scheduled', 'Scheduled'),
-        ('in_progress', 'In Progress'),
-        ('done', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ], string='Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('scheduled', 'Planifiée'),
+        ('in_progress', 'En cours'),
+        ('done', 'Terminée'),
+        ('cancelled', 'Annulée'),
+    ], string='Statut', default='draft', tracking=True)
     
-    # Service Details
+    # Détails du service
     service_items = fields.One2many('fleet.maintenance.service.item', 
-                                   'maintenance_id', string='Service Items')
-    total_parts_cost = fields.Float(string='Parts Cost', compute='_compute_costs')
-    labor_cost = fields.Float(string='Labor Cost')
-    total_cost = fields.Float(string='Total Cost', compute='_compute_costs')
+                                   'maintenance_id', string='Éléments de service')
+    total_parts_cost = fields.Float(string='Coût des pièces', compute='_compute_costs')
+    labor_cost = fields.Float(string='Coût de la main-d\'œuvre')
+    total_cost = fields.Float(string='Coût total', compute='_compute_costs')
     
-    # Service Provider
-    vendor_id = fields.Many2one('res.partner', string='Service Provider')
-    technician = fields.Char(string='Technician Name')
-    workshop_address = fields.Text(string='Workshop Address')
+    # Fournisseur de service
+    vendor_id = fields.Many2one('res.partner', string='Fournisseur de service')
+    technician = fields.Char(string='Nom du technicien')
+    workshop_address = fields.Text(string='Adresse de l\'atelier')
     
-    # Scheduling
-    scheduled_date = fields.Datetime(string='Scheduled Date')
-    completion_date = fields.Datetime(string='Completion Date')
-    duration = fields.Float(string='Duration (Hours)')
+    # Planification
+    scheduled_date = fields.Datetime(string='Date planifiée')
+    completion_date = fields.Datetime(string='Date de fin')
+    duration = fields.Float(string='Durée (heures)')
     
-    # Vehicle Status
-    odometer = fields.Float(string='Odometer Reading')
-    next_service_odometer = fields.Float(string='Next Service at Odometer')
-    next_service_date = fields.Date(string='Next Service Date')
+    # Statut du véhicule
+    odometer = fields.Float(string='Lecture du compteur kilométrique')
+    next_service_odometer = fields.Float(string='Prochain service à l\'odomètre')
+    next_service_date = fields.Date(string='Date du prochain service')
     
     # Documentation
-    diagnosis = fields.Text(string='Diagnosis/Findings')
-    operations_performed = fields.Text(string='Operations Performed')
-    recommendations = fields.Text(string='Recommendations')
-    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    diagnosis = fields.Text(string='Diagnostic/Constatations')
+    operations_performed = fields.Text(string='Opérations effectuées')
+    recommendations = fields.Text(string='Recommandations')
+    attachment_ids = fields.Many2many('ir.attachment', string='Pièces jointes')
     
-    # Related Info
-    expense_id = fields.Many2one('fleet.expense', string='Related Expense')
-    warranty_claim = fields.Boolean(string='Warranty Claim')
-    warranty_details = fields.Text(string='Warranty Details')
+    # Informations connexes
+    expense_id = fields.Many2one('fleet.expense', string='Dépense associée')
+    warranty_claim = fields.Boolean(string='Réclamation de garantie')
+    warranty_details = fields.Text(string='Détails de la garantie')
 
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.maintenance') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.maintenance') or _('Nouveau')
         return super(FleetMaintenance, self).create(vals)
 
     @api.depends('service_items.cost', 'labor_cost')
@@ -80,7 +80,7 @@ class FleetMaintenance(models.Model):
 
     def action_schedule(self):
         if not self.scheduled_date:
-            raise UserError(_('Please set a scheduled date first.'))
+            raise UserError(_('Veuillez d\'abord définir une date planifiée.'))
         self.state = 'scheduled'
 
     def action_start(self):
@@ -95,45 +95,45 @@ class FleetMaintenance(models.Model):
         self.state = 'cancelled'
 
     def _create_expense_record(self):
-        # Create related expense record
+        # Créer un enregistrement de dépense associé
         if not self.expense_id and self.total_cost > 0:
             expense_vals = {
                 'vehicle_id': self.vehicle_id.id,
                 'date': fields.Date.today(),
                 'amount': self.total_cost,
                 'expense_type': 'maintenance',
-                'description': f'Maintenance: {self.name}',
+                'description': f'Maintenance : {self.name}',
                 'vendor_id': self.vendor_id.id,
             }
             self.expense_id = self.env['fleet.expense'].create(expense_vals)
 
     def action_print_report(self):
-        # Generate maintenance report
+        # Générer un rapport de maintenance
         pass
 
     def action_send_reminder(self):
-        # Send reminder to responsible person
+        # Envoyer un rappel à la personne responsable
         pass
 
 class FleetMaintenanceServiceItem(models.Model):
     _name = 'fleet.maintenance.service.item'
-    _description = 'Maintenance Service Item'
+    _description = 'Élément de service de maintenance'
 
     maintenance_id = fields.Many2one('fleet.vehicle.maintenance', 
-                                    string='Maintenance Record')
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle',
+                                    string='Enregistrement de maintenance')
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule',
                                 related='maintenance_id.vehicle_id',
                                 store=True)
-    name = fields.Char(string='Service Item', required=True)
-    product_id = fields.Many2one('product.product', string='Part')
-    quantity = fields.Float(string='Quantity', default=1.0)
-    unit_cost = fields.Float(string='Unit Cost')
-    cost = fields.Float(string='Total Cost', compute='_compute_cost')
+    name = fields.Char(string='Élément de service', required=True)
+    product_id = fields.Many2one('product.product', string='Pièce')
+    quantity = fields.Float(string='Quantité', default=1.0)
+    unit_cost = fields.Float(string='Coût unitaire')
+    cost = fields.Float(string='Coût total', compute='_compute_cost')
     state = fields.Selection([
-        ('planned', 'Planned'),
-        ('done', 'Done'),
-        ('cancelled', 'Cancelled')
-    ], string='Status', default='planned')
+        ('planned', 'Planifié'),
+        ('done', 'Terminé'),
+        ('cancelled', 'Annulé')
+    ], string='Statut', default='planned')
 
     @api.depends('quantity', 'unit_cost')
     def _compute_cost(self):

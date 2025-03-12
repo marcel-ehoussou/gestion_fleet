@@ -27,9 +27,9 @@
         'security/dashboard_security.xml',
         'security/ir.model.access.csv',
         'views/dashboard_views.xml',
-        'views/fleet_dashboard_views.xml',
+        # 'views/fleet_dashboard_views.xml',
         'views/kpi_dashboard_views.xml',
-        'views/menu_views.xml',
+        # 'views/menu_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

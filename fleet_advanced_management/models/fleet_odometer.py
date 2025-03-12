@@ -4,43 +4,43 @@ from datetime import datetime
 
 class FleetVehicleOdometerLog(models.Model):
     _name = 'fleet.vehicle.odometer.log'
-    _description = 'Vehicle Odometer Log'
+    _description = 'Journal du compteur kilométrique du véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
-    # Odometer Information
-    value = fields.Float(string='Odometer Value', required=True)
+    # Informations du compteur kilométrique
+    value = fields.Float(string='Valeur du compteur kilométrique', required=True)
     unit = fields.Selection([
-        ('kilometers', 'Kilometers'),
+        ('kilometers', 'Kilomètres'),
         ('miles', 'Miles')
-    ], string='Unit', required=True, default='kilometers')
-    previous_odometer = fields.Float(string='Previous Odometer', compute='_compute_previous_odometer')
+    ], string='Unité', required=True, default='kilometers')
+    previous_odometer = fields.Float(string='Compteur kilométrique précédent', compute='_compute_previous_odometer')
     distance = fields.Float(string='Distance', compute='_compute_distance', store=True)
     
-    # Additional Information
-    driver_id = fields.Many2one('fleet.driver', string='Driver')
+    # Informations supplémentaires
+    driver_id = fields.Many2one('fleet.driver', string='Conducteur')
     reason = fields.Selection([
-        ('start_day', 'Start of Day'),
-        ('end_day', 'End of Day'),
-        ('trip', 'Trip'),
+        ('start_day', 'Début de journée'),
+        ('end_day', 'Fin de journée'),
+        ('trip', 'Voyage'),
         ('maintenance', 'Maintenance'),
-        ('fuel', 'Fuel Fill'),
-        ('other', 'Other')
-    ], string='Reason')
+        ('fuel', 'Remplissage de carburant'),
+        ('other', 'Autre')
+    ], string='Raison')
     
-    location = fields.Char(string='Location')
+    location = fields.Char(string='Lieu')
     notes = fields.Text(string='Notes')
-    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    attachment_ids = fields.Many2many('ir.attachment', string='Pièces jointes')
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.odometer.log') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.odometer.log') or _('Nouveau')
         return super(FleetVehicleOdometerLog, self).create(vals)
 
     @api.depends('vehicle_id', 'date')
@@ -62,13 +62,13 @@ class FleetVehicleOdometerLog(models.Model):
     def _check_odometer_value(self):
         for record in self:
             if record.previous_odometer > record.value:
-                raise UserError(_('The odometer value cannot be less than the previous odometer reading.'))
+                raise UserError(_('La valeur du compteur kilométrique ne peut pas être inférieure à la lecture précédente.'))
 
     def action_create_trip_record(self):
-        """Create a trip record based on odometer log"""
+        """Créer un enregistrement de voyage basé sur le journal du compteur kilométrique"""
         self.ensure_one()
         return {
-            'name': _('Create Trip Record'),
+            'name': _('Créer un enregistrement de voyage'),
             'type': 'ir.actions.act_window',
             'res_model': 'fleet.vehicle.trip',
             'view_mode': 'form',
@@ -82,7 +82,7 @@ class FleetVehicleOdometerLog(models.Model):
         }
 
     def action_update_vehicle_odometer(self):
-        """Update vehicle's current odometer reading"""
+        """Mettre à jour la lecture actuelle du compteur kilométrique du véhicule"""
         self.ensure_one()
         self.vehicle_id.write({
             'odometer': self.value,

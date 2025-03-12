@@ -4,49 +4,49 @@ from datetime import datetime
 
 class FleetVehicleFuelLog(models.Model):
     _name = 'fleet.vehicle.fuel.log'
-    _description = 'Vehicle Fuel Log'
+    _description = 'Journal de carburant du véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
-    # Fuel Details
+    # Détails du carburant
     fuel_type = fields.Selection([
         ('diesel', 'Diesel'),
-        ('gasoline', 'Gasoline'),
-        ('electric', 'Electric'),
-        ('hybrid', 'Hybrid'),
-        ('lpg', 'LPG'),
-        ('cng', 'CNG'),
-        ('other', 'Other'),
-    ], string='Fuel Type', required=True)
+        ('gasoline', 'Essence'),
+        ('electric', 'Électrique'),
+        ('hybrid', 'Hybride'),
+        ('lpg', 'GPL'),
+        ('cng', 'GNC'),
+        ('other', 'Autre'),
+    ], string='Type de carburant', required=True)
     
-    liters = fields.Float(string='Liters')
-    price_per_liter = fields.Float(string='Price per Liter')
-    total_amount = fields.Float(string='Total Amount', compute='_compute_amount', store=True)
+    liters = fields.Float(string='Litres')
+    price_per_liter = fields.Float(string='Prix par litre')
+    total_amount = fields.Float(string='Montant total', compute='_compute_amount', store=True)
     
-    # Odometer
-    odometer = fields.Float(string='Odometer Reading', required=True)
-    previous_odometer = fields.Float(string='Previous Odometer', compute='_compute_previous_odometer')
+    # Compteur kilométrique
+    odometer = fields.Float(string='Lecture du compteur kilométrique', required=True)
+    previous_odometer = fields.Float(string='Compteur kilométrique précédent', compute='_compute_previous_odometer')
     distance = fields.Float(string='Distance', compute='_compute_distance', store=True)
     
-    # Location and Vendor
-    location = fields.Char(string='Fill-up Location')
-    vendor_id = fields.Many2one('res.partner', string='Vendor/Station')
-    invoice_reference = fields.Char(string='Invoice Reference')
+    # Localisation et fournisseur
+    location = fields.Char(string='Lieu de remplissage')
+    vendor_id = fields.Many2one('res.partner', string='Fournisseur/Station')
+    invoice_reference = fields.Char(string='Référence de la facture')
     
-    # Additional Info
+    # Informations supplémentaires
     notes = fields.Text(string='Notes')
-    full_tank = fields.Boolean(string='Full Tank')
-    consumption = fields.Float(string='Consumption (L/100km)', compute='_compute_consumption')
+    full_tank = fields.Boolean(string='Plein complet')
+    consumption = fields.Float(string='Consommation (L/100km)', compute='_compute_consumption')
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.fuel.log') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.fuel.log') or _('Nouveau')
         return super(FleetVehicleFuelLog, self).create(vals)
 
     @api.depends('liters', 'price_per_liter')
@@ -75,19 +75,19 @@ class FleetVehicleFuelLog(models.Model):
             record.consumption = (record.liters * 100 / record.distance) if record.distance > 0 else 0.0
 
     def action_create_expense(self):
-        """Create an expense record from fuel log"""
+        """Créer un enregistrement de dépense à partir du journal de carburant"""
         self.ensure_one()
         expense_vals = {
             'vehicle_id': self.vehicle_id.id,
             'date': self.date,
             'amount': self.total_amount,
             'expense_type': 'fuel',
-            'description': f'Fuel: {self.name}',
+            'description': f'Carburant : {self.name}',
             'vendor_id': self.vendor_id.id,
         }
         expense = self.env['fleet.expense'].create(expense_vals)
         return {
-            'name': _('Expense'),
+            'name': _('Dépense'),
             'view_mode': 'form',
             'res_model': 'fleet.expense',
             'res_id': expense.id,

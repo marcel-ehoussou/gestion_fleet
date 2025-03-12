@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Security Groups -->
+        <!-- Groupes de sécurité -->
         <record id="group_fleet_user" model="res.groups">
-            <field name="name">Fleet User</field>
+            <field name="name">Utilisateur de flotte</field>
             <field name="category_id" ref="base.module_category_operations_fleet"/>
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         </record>
 
         <record id="group_fleet_manager" model="res.groups">
-            <field name="name">Fleet Manager</field>
+            <field name="name">Gestionnaire de flotte</field>
             <field name="category_id" ref="base.module_category_operations_fleet"/>
             <field name="implied_ids" eval="[(4, ref('group_fleet_user'))]"/>
             <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
         </record>
 
-        <!-- Record Rules -->
+        <!-- Règles d'accès -->
         <record id="fleet_vehicle_rule_user" model="ir.rule">
-            <field name="name">Fleet Vehicle: User Access</field>
+            <field name="name">Véhicule de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_vehicle"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -28,7 +28,7 @@
         </record>
 
         <record id="fleet_vehicle_rule_manager" model="ir.rule">
-            <field name="name">Fleet Vehicle: Manager Access</field>
+            <field name="name">Véhicule de flotte : Accès gestionnaire</field>
             <field name="model_id" ref="model_fleet_vehicle"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_manager'))]"/>
@@ -38,10 +38,10 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
-        <!-- Similar rules for other models -->
-        <!-- Driver Rules -->
+        <!-- Règles similaires pour d'autres modèles -->
+        <!-- Règles de conducteur -->
         <record id="fleet_driver_rule_user" model="ir.rule">
-            <field name="name">Fleet Driver: User Access</field>
+            <field name="name">Conducteur de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_driver"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -51,9 +51,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Expense Rules -->
+        <!-- Règles de dépense -->
         <record id="fleet_expense_rule_user" model="ir.rule">
-            <field name="name">Fleet Expense: User Access</field>
+            <field name="name">Dépense de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_expense"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -63,9 +63,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Maintenance Rules -->
+        <!-- Règles de maintenance -->
         <record id="fleet_maintenance_rule_user" model="ir.rule">
-            <field name="name">Fleet Maintenance: User Access</field>
+            <field name="name">Maintenance de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_vehicle_maintenance"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -75,9 +75,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Reservation Rules -->
+        <!-- Règles de réservation -->
         <record id="fleet_reservation_rule_user" model="ir.rule">
-            <field name="name">Fleet Reservation: User Access</field>
+            <field name="name">Réservation de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_vehicle_reservation"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -87,9 +87,9 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Document Rules -->
+        <!-- Règles de document -->
         <record id="fleet_document_rule_user" model="ir.rule">
-            <field name="name">Fleet Document: User Access</field>
+            <field name="name">Document de flotte : Accès utilisateur</field>
             <field name="model_id" ref="model_fleet_vehicle_document"/>
             <field name="domain_force">[(1, '=', 1)]</field>
             <field name="groups" eval="[(4, ref('group_fleet_user'))]"/>
@@ -98,5 +98,153 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
+
+         <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_vehicle_fuel_log_user" model="ir.model.access">
+            <field name="name">fleet.vehicle.fuel.log.user</field>
+            <field name="model_id" ref="model_fleet_vehicle_fuel_log"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_vehicle_fuel_log_manager" model="ir.model.access">
+            <field name="name">fleet.vehicle.fuel.log.manager</field>
+            <field name="model_id" ref="model_fleet_vehicle_fuel_log"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_driver_schedule_user" model="ir.model.access">
+            <field name="name">fleet.driver.schedule.user</field>
+            <field name="model_id" ref="model_fleet_driver_schedule"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_driver_schedule_manager" model="ir.model.access">
+            <field name="name">fleet.driver.schedule.manager</field>
+            <field name="model_id" ref="model_fleet_driver_schedule"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+         <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_vehicle_insurance_user" model="ir.model.access">
+            <field name="name">fleet.vehicle.insurance.user</field>
+            <field name="model_id" ref="model_fleet_vehicle_insurance"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_vehicle_insurance_manager" model="ir.model.access">
+            <field name="name">fleet.vehicle.insurance.manager</field>
+            <field name="model_id" ref="model_fleet_vehicle_insurance"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_vehicle_inspection_user" model="ir.model.access">
+            <field name="name">fleet.vehicle.inspection.user</field>
+            <field name="model_id" ref="model_fleet_vehicle_inspection"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_vehicle_inspection_manager" model="ir.model.access">
+            <field name="name">fleet.vehicle.inspection.manager</field>
+            <field name="model_id" ref="model_fleet_vehicle_inspection"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_vehicle_odometer_log_user" model="ir.model.access">
+            <field name="name">fleet.vehicle.odometer.log.user</field>
+            <field name="model_id" ref="model_fleet_vehicle_odometer_log"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_vehicle_odometer_log_manager" model="ir.model.access">
+            <field name="name">fleet.vehicle.odometer.log.manager</field>
+            <field name="model_id" ref="model_fleet_vehicle_odometer_log"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_vehicle_revenue_user" model="ir.model.access">
+            <field name="name">fleet.vehicle.revenue.user</field>
+            <field name="model_id" ref="model_fleet_vehicle_revenue"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_vehicle_revenue_manager" model="ir.model.access">
+            <field name="name">fleet.vehicle.revenue.manager</field>
+            <field name="model_id" ref="model_fleet_vehicle_revenue"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
+        <!-- Accès pour les utilisateurs -->
+        <record id="access_fleet_driver_document_user" model="ir.model.access">
+            <field name="name">fleet.driver.document.user</field>
+            <field name="model_id" ref="model_fleet_driver_document"/>
+            <field name="group_id" ref="group_fleet_user"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="0"/>
+            <field name="perm_create" eval="0"/>
+            <field name="perm_unlink" eval="0"/>
+        </record>
+        <!-- Accès pour les gestionnaires -->
+        <record id="access_fleet_driver_document_manager" model="ir.model.access">
+            <field name="name">fleet.driver.document.manager</field>
+            <field name="model_id" ref="model_fleet_driver_document"/>
+            <field name="group_id" ref="group_fleet_manager"/>
+            <field name="perm_read" eval="1"/>
+            <field name="perm_write" eval="1"/>
+            <field name="perm_create" eval="1"/>
+            <field name="perm_unlink" eval="1"/>
+        </record>
+
     </data>
 </odoo>

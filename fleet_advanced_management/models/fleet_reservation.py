@@ -4,65 +4,65 @@ from datetime import datetime, timedelta
 
 class FleetReservation(models.Model):
     _name = 'fleet.vehicle.reservation'
-    _description = 'Vehicle Reservation'
+    _description = 'Réservation de véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'start_date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
-    driver_id = fields.Many2one('fleet.driver', string='Driver', required=True)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
+    driver_id = fields.Many2one('fleet.driver', string='Conducteur', required=True)
     
-    # Reservation Period
-    start_date = fields.Datetime(string='Start Date', required=True)
-    end_date = fields.Datetime(string='End Date', required=True)
-    duration = fields.Float(string='Duration (Hours)', compute='_compute_duration')
+    # Période de réservation
+    start_date = fields.Datetime(string='Date de début', required=True)
+    end_date = fields.Datetime(string='Date de fin', required=True)
+    duration = fields.Float(string='Durée (heures)', compute='_compute_duration')
     
-    # Purpose and Route
+    # Objet et itinéraire
     purpose = fields.Selection([
-        ('business', 'Business Trip'),
-        ('delivery', 'Delivery'),
+        ('business', 'Voyage d\'affaires'),
+        ('delivery', 'Livraison'),
         ('maintenance', 'Maintenance'),
-        ('other', 'Other'),
-    ], string='Purpose', required=True)
+        ('other', 'Autre'),
+    ], string='Objet', required=True)
     description = fields.Text(string='Description')
-    start_location = fields.Char(string='Start Location')
-    end_location = fields.Char(string='End Location')
-    estimated_distance = fields.Float(string='Estimated Distance (km)')
+    start_location = fields.Char(string='Lieu de départ')
+    end_location = fields.Char(string='Lieu d\'arrivée')
+    estimated_distance = fields.Float(string='Distance estimée (km)')
     
-    # Status
+    # Statut
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirmed', 'Confirmed'),
-        ('ongoing', 'Ongoing'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ], string='Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('confirmed', 'Confirmé'),
+        ('ongoing', 'En cours'),
+        ('completed', 'Terminé'),
+        ('cancelled', 'Annulé'),
+    ], string='Statut', default='draft', tracking=True)
     
-    # Odometer Readings
-    initial_odometer = fields.Float(string='Initial Odometer')
-    final_odometer = fields.Float(string='Final Odometer')
-    actual_distance = fields.Float(string='Actual Distance', 
+    # Lectures du compteur kilométrique
+    initial_odometer = fields.Float(string='Compteur kilométrique initial')
+    final_odometer = fields.Float(string='Compteur kilométrique final')
+    actual_distance = fields.Float(string='Distance réelle', 
                                  compute='_compute_actual_distance')
     
-    # Costs and Revenue
-    estimated_fuel_cost = fields.Float(string='Estimated Fuel Cost',
+    # Coûts et revenus
+    estimated_fuel_cost = fields.Float(string='Coût estimé du carburant',
                                      compute='_compute_estimated_costs')
-    actual_fuel_cost = fields.Float(string='Actual Fuel Cost')
-    additional_costs = fields.Float(string='Additional Costs')
-    total_cost = fields.Float(string='Total Cost', compute='_compute_total_cost')
-    revenue = fields.Float(string='Revenue')
+    actual_fuel_cost = fields.Float(string='Coût réel du carburant')
+    additional_costs = fields.Float(string='Coûts supplémentaires')
+    total_cost = fields.Float(string='Coût total', compute='_compute_total_cost')
+    revenue = fields.Float(string='Revenu')
     profit = fields.Float(string='Profit', compute='_compute_profit')
     
-    # Related Documents
+    # Documents associés
     document_ids = fields.Many2many('fleet.vehicle.document', 
-                                  string='Related Documents')
+                                  string='Documents associés')
     note = fields.Text(string='Notes')
 
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.reservation') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.reservation') or _('Nouveau')
         return super(FleetReservation, self).create(vals)
 
     @api.depends('start_date', 'end_date')
@@ -87,9 +87,9 @@ class FleetReservation(models.Model):
     def _compute_estimated_costs(self):
         for record in self:
             if record.vehicle_id and record.estimated_distance:
-                # Calculate estimated fuel cost based on vehicle's fuel efficiency
+                # Calculer le coût estimé du carburant en fonction de l'efficacité énergétique du véhicule
                 fuel_efficiency = record.vehicle_id.fuel_efficiency or 10  # L/100km
-                avg_fuel_price = 1.5  # Average fuel price per liter
+                avg_fuel_price = 1.5  # Prix moyen du carburant par litre
                 estimated_fuel = (record.estimated_distance / 100) * fuel_efficiency
                 record.estimated_fuel_cost = estimated_fuel * avg_fuel_price
             else:
@@ -110,8 +110,8 @@ class FleetReservation(models.Model):
         for record in self:
             if record.start_date and record.end_date:
                 if record.start_date > record.end_date:
-                    raise ValidationError(_('End date cannot be before start date'))
-                # Check for overlapping reservations
+                    raise ValidationError(_('La date de fin ne peut pas être antérieure à la date de début'))
+                # Vérifier les réservations qui se chevauchent
                 domain = [
                     ('vehicle_id', '=', record.vehicle_id.id),
                     ('id', '!=', record.id),
@@ -123,7 +123,7 @@ class FleetReservation(models.Model):
                          ('end_date', '>=', record.end_date),
                 ]
                 if self.search_count(domain):
-                    raise ValidationError(_('Vehicle is already reserved for this period'))
+                    raise ValidationError(_('Le véhicule est déjà réservé pour cette période'))
 
     def action_confirm(self):
         self.state = 'confirmed'
@@ -131,13 +131,13 @@ class FleetReservation(models.Model):
     def action_start(self):
         self.ensure_one()
         if not self.initial_odometer:
-            raise ValidationError(_('Please set initial odometer reading'))
+            raise ValidationError(_('Veuillez définir la lecture initiale du compteur kilométrique'))
         self.state = 'ongoing'
 
     def action_complete(self):
         self.ensure_one()
         if not self.final_odometer:
-            raise ValidationError(_('Please set final odometer reading'))
+            raise ValidationError(_('Veuillez définir la lecture finale du compteur kilométrique'))
         self.state = 'completed'
         self._create_expense_records()
 
@@ -145,7 +145,7 @@ class FleetReservation(models.Model):
         self.state = 'cancelled'
 
     def _create_expense_records(self):
-        # Create expense records for fuel and additional costs
+        # Créer des enregistrements de dépenses pour le carburant et les coûts supplémentaires
         if self.actual_fuel_cost > 0:
             self.env['fleet.expense'].create({
                 'vehicle_id': self.vehicle_id.id,
@@ -153,7 +153,7 @@ class FleetReservation(models.Model):
                 'date': fields.Date.today(),
                 'expense_type': 'fuel',
                 'amount': self.actual_fuel_cost,
-                'description': f'Fuel cost for reservation {self.name}',
+                'description': f'Coût du carburant pour la réservation {self.name}',
             })
         if self.additional_costs > 0:
             self.env['fleet.expense'].create({
@@ -162,13 +162,13 @@ class FleetReservation(models.Model):
                 'date': fields.Date.today(),
                 'expense_type': 'other',
                 'amount': self.additional_costs,
-                'description': f'Additional costs for reservation {self.name}',
+                'description': f'Coûts supplémentaires pour la réservation {self.name}',
             })
 
     def action_print_trip_sheet(self):
-        # Generate trip sheet report
+        # Générer le rapport de feuille de route
         pass
 
     def action_send_confirmation(self):
-        # Send confirmation email to driver
+        # Envoyer un email de confirmation au conducteur
         pass

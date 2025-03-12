@@ -28,6 +28,7 @@
         'mail',
     ],
     'data': [
+        'data/action.xml',
         'security/fleet_security.xml',
         'security/ir.model.access.csv',
         'views/fleet_vehicle_views.xml',
@@ -36,9 +37,10 @@
         'views/fleet_maintenance_views.xml',
         'views/fleet_reservation_views.xml',
         'views/fleet_document_views.xml',
-        'views/fleet_dashboard_views.xml',
-        'views/menu_views.xml',
-        'data/fleet_data.xml',
+        # 'views/fleet_dashboard_views.xml',
+        'menus/menu_views.xml',
+        # 'views/menu_views.xml',
+        # 'data/fleet_data.xml',
     ],
     'demo': [
         'data/fleet_demo.xml',

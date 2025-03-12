@@ -4,55 +4,55 @@ from datetime import datetime, timedelta
 
 class FleetDriverSchedule(models.Model):
     _name = 'fleet.driver.schedule'
-    _description = 'Driver Work Schedule'
+    _description = 'Planning de travail du conducteur'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'start_datetime desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    driver_id = fields.Many2one('fleet.driver', string='Driver', required=True)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    driver_id = fields.Many2one('fleet.driver', string='Conducteur', required=True)
     
-    # Schedule Period
-    start_datetime = fields.Datetime(string='Start Time', required=True)
-    end_datetime = fields.Datetime(string='End Time', required=True)
-    duration = fields.Float(string='Duration (Hours)', compute='_compute_duration')
+    # Période de planification
+    start_datetime = fields.Datetime(string='Heure de début', required=True)
+    end_datetime = fields.Datetime(string='Heure de fin', required=True)
+    duration = fields.Float(string='Durée (heures)', compute='_compute_duration')
     
-    # Schedule Type
+    # Type de planification
     schedule_type = fields.Selection([
-        ('regular', 'Regular Shift'),
-        ('overtime', 'Overtime'),
-        ('on_call', 'On Call'),
-        ('standby', 'Standby'),
-        ('leave', 'Leave'),
-    ], string='Schedule Type', required=True, default='regular')
+        ('regular', 'Service régulier'),
+        ('overtime', 'Heures supplémentaires'),
+        ('on_call', 'Sur appel'),
+        ('standby', 'En attente'),
+        ('leave', 'Congé'),
+    ], string='Type de planification', required=True, default='regular')
     
-    # Status
+    # Statut
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirmed', 'Confirmed'),
-        ('in_progress', 'In Progress'),
-        ('completed', 'Completed'),
-        ('cancelled', 'Cancelled'),
-    ], string='Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('confirmed', 'Confirmé'),
+        ('in_progress', 'En cours'),
+        ('completed', 'Terminé'),
+        ('cancelled', 'Annulé'),
+    ], string='Statut', default='draft', tracking=True)
     
-    # Assignment Details
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Assigned Vehicle')
-    location = fields.Char(string='Work Location')
+    # Détails de l'affectation
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule assigné')
+    location = fields.Char(string='Lieu de travail')
     description = fields.Text(string='Description')
     
-    # Time Tracking
-    check_in = fields.Datetime(string='Check In Time')
-    check_out = fields.Datetime(string='Check Out Time')
-    actual_hours = fields.Float(string='Actual Hours', compute='_compute_actual_hours')
+    # Suivi du temps
+    check_in = fields.Datetime(string='Heure d\'arrivée')
+    check_out = fields.Datetime(string='Heure de départ')
+    actual_hours = fields.Float(string='Heures réelles', compute='_compute_actual_hours')
     
-    # Additional Information
+    # Informations supplémentaires
     notes = fields.Text(string='Notes')
-    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    attachment_ids = fields.Many2many('ir.attachment', string='Pièces jointes')
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.driver.schedule') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.driver.schedule') or _('Nouveau')
         return super(FleetDriverSchedule, self).create(vals)
 
     @api.depends('start_datetime', 'end_datetime')
@@ -80,9 +80,9 @@ class FleetDriverSchedule(models.Model):
         for record in self:
             if record.start_datetime and record.end_datetime:
                 if record.start_datetime > record.end_datetime:
-                    raise ValidationError(_('End time cannot be before start time'))
+                    raise ValidationError(_('L\'heure de fin ne peut pas être avant l\'heure de début'))
                 
-                # Check for overlapping schedules
+                # Vérifier les plannings qui se chevauchent
                 domain = [
                     ('driver_id', '=', record.driver_id.id),
                     ('id', '!=', record.id),
@@ -94,7 +94,7 @@ class FleetDriverSchedule(models.Model):
                          ('end_datetime', '>=', record.end_datetime),
                 ]
                 if self.search_count(domain):
-                    raise ValidationError(_('Driver already has a schedule for this period'))
+                    raise ValidationError(_('Le conducteur a déjà un planning pour cette période'))
 
     def action_confirm(self):
         self.ensure_one()
@@ -108,7 +108,7 @@ class FleetDriverSchedule(models.Model):
     def action_complete(self):
         self.ensure_one()
         if not self.check_in:
-            raise ValidationError(_('Cannot complete schedule without check-in time'))
+            raise ValidationError(_('Impossible de terminer le planning sans heure d\'arrivée'))
         self.state = 'completed'
         self.check_out = fields.Datetime.now()
 
@@ -123,9 +123,9 @@ class FleetDriverSchedule(models.Model):
         self.check_out = False
 
     def action_print_schedule(self):
-        """Print schedule details"""
+        """Imprimer les détails du planning"""
         pass
 
     def action_send_notification(self):
-        """Send schedule notification to driver"""
+        """Envoyer une notification de planning au conducteur"""
         pass

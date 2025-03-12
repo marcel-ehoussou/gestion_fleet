@@ -4,100 +4,100 @@ from datetime import datetime
 
 class FleetVehicleInspection(models.Model):
     _name = 'fleet.vehicle.inspection'
-    _description = 'Vehicle Technical Inspection'
+    _description = 'Inspection technique du véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
-    date = fields.Date(string='Inspection Date', required=True, default=fields.Date.context_today)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
+    date = fields.Date(string='Date d\'inspection', required=True, default=fields.Date.context_today)
     
-    # Inspection Details
+    # Détails de l'inspection
     inspection_type = fields.Selection([
-        ('periodic', 'Periodic Technical Inspection'),
-        ('pre_purchase', 'Pre-Purchase Inspection'),
-        ('damage', 'Damage Assessment'),
-        ('warranty', 'Warranty Inspection'),
-        ('other', 'Other')
-    ], string='Inspection Type', required=True)
+        ('periodic', 'Inspection technique périodique'),
+        ('pre_purchase', 'Inspection avant achat'),
+        ('damage', 'Évaluation des dommages'),
+        ('warranty', 'Inspection de garantie'),
+        ('other', 'Autre')
+    ], string='Type d\'inspection', required=True)
     
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('in_progress', 'In Progress'),
-        ('passed', 'Passed'),
-        ('failed', 'Failed'),
-        ('cancelled', 'Cancelled')
-    ], string='Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('in_progress', 'En cours'),
+        ('passed', 'Réussi'),
+        ('failed', 'Échoué'),
+        ('cancelled', 'Annulé')
+    ], string='Statut', default='draft', tracking=True)
     
-    # Inspector Information
-    inspector_id = fields.Many2one('res.partner', string='Inspector/Company')
-    inspector_name = fields.Char(string='Inspector Name')
-    location = fields.Char(string='Inspection Location')
+    # Informations sur l'inspecteur
+    inspector_id = fields.Many2one('res.partner', string='Inspecteur/Entreprise')
+    inspector_name = fields.Char(string='Nom de l\'inspecteur')
+    location = fields.Char(string='Lieu de l\'inspection')
     
-    # Vehicle Information at Time of Inspection
-    odometer = fields.Float(string='Odometer Reading')
-    next_inspection_date = fields.Date(string='Next Inspection Due')
-    next_inspection_odometer = fields.Float(string='Next Inspection Odometer')
+    # Informations sur le véhicule au moment de l'inspection
+    odometer = fields.Float(string='Lecture du compteur kilométrique')
+    next_inspection_date = fields.Date(string='Prochaine inspection due')
+    next_inspection_odometer = fields.Float(string='Prochain compteur kilométrique d\'inspection')
     
-    # Inspection Areas
+    # Zones d'inspection
     brake_system = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
-    ], string='Brake System')
+    ], string='Système de freinage')
     
     suspension = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
     ], string='Suspension')
     
     steering = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
-    ], string='Steering')
+    ], string='Direction')
     
     engine = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
-    ], string='Engine')
+    ], string='Moteur')
     
     transmission = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
     ], string='Transmission')
     
     exhaust = fields.Selection([
-        ('good', 'Good'),
-        ('fair', 'Fair'),
-        ('poor', 'Poor'),
+        ('good', 'Bon'),
+        ('fair', 'Moyen'),
+        ('poor', 'Mauvais'),
         ('na', 'N/A')
-    ], string='Exhaust System')
+    ], string='Système d\'échappement')
     
-    # Results and Documentation
-    passed_all = fields.Boolean(string='Passed All Checks', compute='_compute_passed_all')
+    # Résultats et documentation
+    passed_all = fields.Boolean(string='Tous les contrôles réussis', compute='_compute_passed_all')
     notes = fields.Text(string='Notes')
-    recommendations = fields.Text(string='Recommendations')
+    recommendations = fields.Text(string='Recommandations')
     attachment_ids = fields.Many2many('ir.attachment', string='Documents')
     
-    # Costs
-    cost = fields.Float(string='Inspection Cost')
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    # Coûts
+    cost = fields.Float(string='Coût de l\'inspection')
+    currency_id = fields.Many2one('res.currency', string='Devise',
                                  default=lambda self: self.env.company.currency_id)
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.inspection') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.inspection') or _('Nouveau')
         return super(FleetVehicleInspection, self).create(vals)
 
     @api.depends('brake_system', 'suspension', 'steering', 'engine', 'transmission', 'exhaust')
@@ -112,7 +112,7 @@ class FleetVehicleInspection(models.Model):
 
     def action_mark_passed(self):
         if not self.passed_all:
-            raise UserError(_('Cannot mark as passed. Some checks have failed.'))
+            raise UserError(_('Impossible de marquer comme réussi. Certains contrôles ont échoué.'))
         self.state = 'passed'
 
     def action_mark_failed(self):
@@ -122,22 +122,22 @@ class FleetVehicleInspection(models.Model):
         self.state = 'cancelled'
 
     def action_create_expense(self):
-        """Create expense record for inspection cost"""
+        """Créer un enregistrement de dépense pour le coût de l'inspection"""
         self.ensure_one()
         if not self.cost:
-            raise UserError(_('Please set the inspection cost first.'))
+            raise UserError(_('Veuillez d\'abord définir le coût de l\'inspection.'))
             
         expense_vals = {
             'vehicle_id': self.vehicle_id.id,
             'date': self.date,
             'amount': self.cost,
             'expense_type': 'inspection',
-            'description': f'Technical Inspection: {self.name}',
+            'description': f'Inspection technique : {self.name}',
             'vendor_id': self.inspector_id.id,
         }
         expense = self.env['fleet.expense'].create(expense_vals)
         return {
-            'name': _('Expense'),
+            'name': _('Dépense'),
             'view_mode': 'form',
             'res_model': 'fleet.expense',
             'res_id': expense.id,
@@ -145,10 +145,10 @@ class FleetVehicleInspection(models.Model):
         }
 
     def action_schedule_maintenance(self):
-        """Schedule maintenance based on inspection results"""
+        """Planifier la maintenance en fonction des résultats de l'inspection"""
         self.ensure_one()
         return {
-            'name': _('Schedule Maintenance'),
+            'name': _('Planifier la maintenance'),
             'type': 'ir.actions.act_window',
             'res_model': 'fleet.vehicle.maintenance',
             'view_mode': 'form',

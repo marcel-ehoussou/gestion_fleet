@@ -4,52 +4,52 @@ from datetime import datetime
 
 class FleetVehicleRevenue(models.Model):
     _name = 'fleet.vehicle.revenue'
-    _description = 'Vehicle Revenue'
+    _description = 'Revenu du véhicule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False,
-                      readonly=True, default=lambda self: _('New'))
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
+    name = fields.Char(string='Référence', required=True, copy=False,
+                      readonly=True, default=lambda self: _('Nouveau'))
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
     
-    # Revenue Source
+    # Source de revenu
     revenue_type = fields.Selection([
-        ('rental', 'Vehicle Rental'),
-        ('service', 'Service Revenue'),
-        ('sale', 'Vehicle Sale'),
-        ('insurance', 'Insurance Claim'),
-        ('other', 'Other'),
-    ], string='Revenue Type', required=True)
+        ('rental', 'Location de véhicule'),
+        ('service', 'Revenu de service'),
+        ('sale', 'Vente de véhicule'),
+        ('insurance', 'Réclamation d\'assurance'),
+        ('other', 'Autre'),
+    ], string='Type de revenu', required=True)
     
-    # Financial Information
-    amount = fields.Float(string='Amount', required=True)
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    # Informations financières
+    amount = fields.Float(string='Montant', required=True)
+    currency_id = fields.Many2one('res.currency', string='Devise',
                                  default=lambda self: self.env.company.currency_id)
-    tax_amount = fields.Float(string='Tax Amount')
-    total_amount = fields.Float(string='Total Amount', compute='_compute_total')
+    tax_amount = fields.Float(string='Montant de la taxe')
+    total_amount = fields.Float(string='Montant total', compute='_compute_total')
     
-    # Customer Information
-    partner_id = fields.Many2one('res.partner', string='Customer')
-    invoice_reference = fields.Char(string='Invoice Reference')
+    # Informations sur le client
+    partner_id = fields.Many2one('res.partner', string='Client')
+    invoice_reference = fields.Char(string='Référence de la facture')
     payment_status = fields.Selection([
-        ('draft', 'Draft'),
-        ('pending', 'Pending'),
-        ('paid', 'Paid'),
-        ('cancelled', 'Cancelled'),
-    ], string='Payment Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('pending', 'En attente'),
+        ('paid', 'Payé'),
+        ('cancelled', 'Annulé'),
+    ], string='Statut de paiement', default='draft', tracking=True)
     
-    # Related Information
-    reservation_id = fields.Many2one('fleet.vehicle.reservation', string='Related Reservation')
-    maintenance_id = fields.Many2one('fleet.vehicle.maintenance', string='Related Maintenance')
+    # Informations connexes
+    reservation_id = fields.Many2one('fleet.vehicle.reservation', string='Réservation associée')
+    maintenance_id = fields.Many2one('fleet.vehicle.maintenance', string='Maintenance associée')
     description = fields.Text(string='Description')
     notes = fields.Text(string='Notes')
-    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    attachment_ids = fields.Many2many('ir.attachment', string='Pièces jointes')
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.revenue') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.revenue') or _('Nouveau')
         return super(FleetVehicleRevenue, self).create(vals)
 
     @api.depends('amount', 'tax_amount')
@@ -61,7 +61,7 @@ class FleetVehicleRevenue(models.Model):
     def _check_amount(self):
         for record in self:
             if record.amount <= 0:
-                raise ValidationError(_('Amount must be positive'))
+                raise ValidationError(_('Le montant doit être positif'))
 
     def action_mark_as_paid(self):
         self.ensure_one()
@@ -76,7 +76,7 @@ class FleetVehicleRevenue(models.Model):
         self.payment_status = 'cancelled'
 
     def action_create_invoice(self):
-        """Create customer invoice"""
+        """Créer une facture client"""
         self.ensure_one()
         invoice_vals = {
             'partner_id': self.partner_id.id,
@@ -89,7 +89,7 @@ class FleetVehicleRevenue(models.Model):
         }
         invoice = self.env['account.move'].create(invoice_vals)
         return {
-            'name': _('Invoice'),
+            'name': _('Facture'),
             'view_mode': 'form',
             'res_model': 'account.move',
             'res_id': invoice.id,
@@ -97,11 +97,11 @@ class FleetVehicleRevenue(models.Model):
         }
 
     def action_send_to_accounting(self):
-        """Send revenue record to accounting module"""
-        # Integration with accounting module
+        """Envoyer l'enregistrement de revenu au module de comptabilité"""
+        # Intégration avec le module de comptabilité
         pass
 
     def action_generate_report(self):
-        """Generate revenue report"""
-        # Report generation logic
+        """Générer un rapport de revenu"""
+        # Logique de génération de rapport
         pass

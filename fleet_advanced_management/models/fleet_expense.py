@@ -4,73 +4,73 @@ from datetime import datetime
 
 class FleetExpense(models.Model):
     _name = 'fleet.expense'
-    _description = 'Fleet Expense'
+    _description = 'Dépense de flotte'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc'
 
-    name = fields.Char(string='Reference', required=True, copy=False, 
-                      readonly=True, default=lambda self: _('New'))
+    name = fields.Char(string='Référence', required=True, copy=False, 
+                      readonly=True, default=lambda self: _('Nouveau'))
     date = fields.Date(string='Date', required=True, default=fields.Date.context_today)
-    vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', required=True)
-    driver_id = fields.Many2one('fleet.driver', string='Driver')
+    vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule', required=True)
+    driver_id = fields.Many2one('fleet.driver', string='Conducteur')
     expense_type = fields.Selection([
-        ('fuel', 'Fuel'),
-        ('repair', 'Repair'),
+        ('fuel', 'Carburant'),
+        ('repair', 'Réparation'),
         ('maintenance', 'Maintenance'),
-        ('insurance', 'Insurance'),
-        ('tax', 'Tax'),
-        ('other', 'Other'),
+        ('insurance', 'Assurance'),
+        ('tax', 'Taxe'),
+        ('other', 'Autre'),
     ], string='Type', required=True)
     
-    amount = fields.Float(string='Amount', required=True)
+    amount = fields.Float(string='Montant', required=True)
     description = fields.Text(string='Description')
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('submitted', 'Submitted'),
-        ('approved', 'Approved'),
-        ('paid', 'Paid'),
-        ('cancelled', 'Cancelled'),
-    ], string='Status', default='draft', tracking=True)
+        ('draft', 'Brouillon'),
+        ('submitted', 'Soumis'),
+        ('approved', 'Approuvé'),
+        ('paid', 'Payé'),
+        ('cancelled', 'Annulé'),
+    ], string='Statut', default='draft', tracking=True)
     
-    # Fuel specific fields
-    liters = fields.Float(string='Liters')
-    price_per_liter = fields.Float(string='Price per Liter')
-    odometer = fields.Float(string='Odometer Reading')
+    # Champs spécifiques au carburant
+    liters = fields.Float(string='Litres')
+    price_per_liter = fields.Float(string='Prix par litre')
+    odometer = fields.Float(string='Lecture du compteur kilométrique')
     fuel_type = fields.Selection([
         ('diesel', 'Diesel'),
-        ('gasoline', 'Gasoline'),
-        ('electric', 'Electric'),
-        ('hybrid', 'Hybrid'),
-    ], string='Fuel Type')
+        ('gasoline', 'Essence'),
+        ('electric', 'Électrique'),
+        ('hybrid', 'Hybride'),
+    ], string='Type de carburant')
     
-    # Repair/Maintenance specific fields
-    service_type_id = fields.Many2one('fleet.service.type', string='Service Type')
-    vendor_id = fields.Many2one('res.partner', string='Vendor/Supplier')
-    invoice_ref = fields.Char(string='Invoice Reference')
-    next_service_date = fields.Date(string='Next Service Date')
+    # Champs spécifiques à la réparation/maintenance
+    service_type_id = fields.Many2one('fleet.service.type', string='Type de service')
+    vendor_id = fields.Many2one('res.partner', string='Fournisseur')
+    invoice_ref = fields.Char(string='Référence de la facture')
+    next_service_date = fields.Date(string='Date du prochain service')
     
-    # Insurance/Tax specific fields
-    start_date = fields.Date(string='Start Date')
-    end_date = fields.Date(string='End Date')
-    policy_number = fields.Char(string='Policy/Document Number')
+    # Champs spécifiques à l'assurance/taxe
+    start_date = fields.Date(string='Date de début')
+    end_date = fields.Date(string='Date de fin')
+    policy_number = fields.Char(string='Numéro de police/document')
     
-    # Accounting fields
+    # Champs comptables
     analytic_account_id = fields.Many2one('account.analytic.account', 
-                                         string='Analytic Account')
-    company_id = fields.Many2one('res.company', string='Company', 
+                                         string='Compte analytique')
+    company_id = fields.Many2one('res.company', string='Société', 
                                 default=lambda self: self.env.company)
-    currency_id = fields.Many2one('res.currency', string='Currency',
+    currency_id = fields.Many2one('res.currency', string='Devise',
                                  related='company_id.currency_id')
     
     @api.model
     def create(self, vals):
-        if vals.get('name', _('New')) == _('New'):
-            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.expense') or _('New')
+        if vals.get('name', _('Nouveau')) == _('Nouveau'):
+            vals['name'] = self.env['ir.sequence'].next_by_code('fleet.expense') or _('Nouveau')
         return super(FleetExpense, self).create(vals)
     
     @api.onchange('expense_type')
     def _onchange_expense_type(self):
-        # Reset specific fields when expense type changes
+        # Réinitialiser les champs spécifiques lorsque le type de dépense change
         if self.expense_type != 'fuel':
             self.liters = 0.0
             self.price_per_liter = 0.0
@@ -85,7 +85,7 @@ class FleetExpense(models.Model):
     def _check_dates(self):
         for record in self:
             if record.start_date and record.end_date and record.start_date > record.end_date:
-                raise ValidationError(_('End date cannot be before start date.'))
+                raise ValidationError(_('La date de fin ne peut pas être antérieure à la date de début.'))
                 
     def action_submit(self):
         self.state = 'submitted'
@@ -103,9 +103,9 @@ class FleetExpense(models.Model):
         self.state = 'draft'
         
     def action_create_vendor_bill(self):
-        # Logic to create vendor bill in accounting
+        # Logique pour créer une facture fournisseur en comptabilité
         pass
         
     def action_view_analytics(self):
-        # Logic to view expense analytics
+        # Logique pour voir les analyses des dépenses
         pass

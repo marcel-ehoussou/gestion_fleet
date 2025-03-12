@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Menu Principal -->
+        <menuitem id="menu_fleet_vehicle_root"
+                  name="Gestion de flotte"
+                  web_icon="vista_backend_theme,static/src/img/icons_green/maintenance.png"
+                  sequence="10"/>
+
+        <!-- Menu Tableau de bord -->
+        <menuitem id="menu_fleet_dashboard"
+                  name="Tableau de bord"
+                  parent="menu_fleet_vehicle_root"
+                  action="action_fleet_vehicle_dashboard"
+                  sequence="1"/>
+
+        <!-- Gestion des véhicules -->
+        <menuitem id="menu_fleet_vehicles"
+                  name="Véhicules"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="10"/>
+
+        <menuitem id="menu_fleet_vehicle_list"
+                  name="Véhicules"
+                  parent="menu_fleet_vehicles"
+                  action="action_fleet_vehicle_dashboard"
+                  sequence="1"/>
+
+        <!-- Gestion des conducteurs -->
+        <menuitem id="menu_fleet_drivers"
+                  name="Conducteurs"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="20"/>
+
+        <menuitem id="menu_fleet_driver_list"
+                  name="Conducteurs"
+                  parent="menu_fleet_drivers"
+                  action="action_fleet_driver"
+                  sequence="1"/>
+
+        <!-- Opérations -->
+        <menuitem id="menu_fleet_operations"
+                  name="Opérations"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="30"/>
+
+        <menuitem id="menu_fleet_reservation_list"
+                  name="Réservations"
+                  parent="menu_fleet_operations"
+                  action="action_fleet_reservation"
+                  sequence="1"/>
+
+        <menuitem id="menu_fleet_maintenance_list"
+                  name="Maintenance"
+                  parent="menu_fleet_operations"
+                  action="action_fleet_maintenance"
+                  sequence="2"/>
+
+        <!-- Finance -->
+        <menuitem id="menu_fleet_finance"
+                  name="Finance"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="40"/>
+
+        <menuitem id="menu_fleet_expense_list"
+                  name="Dépenses"
+                  parent="menu_fleet_finance"
+                  action="action_fleet_expense"
+                  sequence="1"/>
+
+        <menuitem id="menu_fleet_expense_analysis"
+                  name="Analyse des dépenses"
+                  parent="menu_fleet_finance"
+                  action="action_fleet_expense"
+                  sequence="2"/>
+
+        <!-- Documents -->
+        <menuitem id="menu_fleet_documents"
+                  name="Documents"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="50"/>
+
+        <menuitem id="menu_fleet_document_list"
+                  name="Tous les documents"
+                  parent="menu_fleet_documents"
+                  action="action_fleet_document"
+                  sequence="1"/>
+
+        <menuitem id="menu_fleet_document_expiring"
+                  name="Documents expirants"
+                  parent="menu_fleet_documents"
+                  action="action_fleet_document"
+                  sequence="2"/>
+
+        <!-- Configuration -->
+        <menuitem id="menu_fleet_configuration"
+                  name="Configuration"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="100"
+                  groups="fleet_advanced_management.group_fleet_manager"/>
+
+        <!-- Reporting -->
+        <menuitem id="menu_fleet_reporting"
+                  name="Rapports"
+                  parent="menu_fleet_vehicle_root"
+                  sequence="90"/>
+
+        <menuitem id="menu_fleet_vehicle_costs_reporting"
+                  name="Coûts des véhicules"
+                  parent="menu_fleet_reporting"
+                  action="action_fleet_expense"
+                  sequence="1"/>
+
+        <menuitem id="menu_fleet_maintenance_reporting"
+                  name="Analyse de la maintenance"
+                  parent="menu_fleet_reporting"
+                  action="action_fleet_maintenance"
+                  sequence="2"/>
+    </data>
+</odoo>

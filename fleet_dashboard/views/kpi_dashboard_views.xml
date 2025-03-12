@@ -167,12 +167,12 @@
                                         <div class="col-6 text-center">
                                             <strong>Trend</strong>
                                             <div>
-                                                <t t-if="record.trend.raw_value > 0">
+                                                <t t-if="record.trend.raw_value &gt; 0">
                                                     <span class="text-success">
                                                         <i class="fa fa-arrow-up"/> <field name="trend"/>%
                                                     </span>
                                                 </t>
-                                                <t t-elif="record.trend.raw_value < 0">
+                                                <t t-elif="record.trend.raw_value &lt; 0">
                                                     <span class="text-danger">
                                                         <i class="fa fa-arrow-down"/> <field name="trend"/>%
                                                     </span>

@@ -5,48 +5,54 @@ from datetime import datetime, timedelta
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
     
-    # Fuel Management
-    fuel_log_ids = fields.One2many('fleet.vehicle.fuel.log', 'vehicle_id', string='Fuel Logs')
-    fuel_efficiency = fields.Float(string='Fuel Efficiency (L/100km)', compute='_compute_fuel_efficiency')
-    last_fuel_cost = fields.Float(string='Last Fuel Cost', compute='_compute_last_fuel_cost')
+    # Gestion du carburant
+    fuel_log_ids = fields.One2many('fleet.vehicle.fuel.log', 'vehicle_id', string='Journaux de carburant')
+    fuel_efficiency = fields.Float(string='Efficacité énergétique (L/100km)', compute='_compute_fuel_efficiency')
+    last_fuel_cost = fields.Float(string='Dernier coût de carburant', compute='_compute_last_fuel_cost')
     
-    # Maintenance and Repairs
-    maintenance_log_ids = fields.One2many('fleet.vehicle.maintenance', 'vehicle_id', string='Maintenance Logs')
-    next_maintenance_date = fields.Date(string='Next Maintenance Date', compute='_compute_next_maintenance', store=True)
-    maintenance_cost_total = fields.Float(string='Total Maintenance Cost', compute='_compute_maintenance_cost')
-    service_count = fields.Integer(string='Services', compute='_compute_service_count')
+    # Maintenance et réparations
+    maintenance_log_ids = fields.One2many('fleet.vehicle.maintenance', 'vehicle_id', string='Journaux de maintenance')
+    next_maintenance_date = fields.Date(string='Date de la prochaine maintenance', compute='_compute_next_maintenance', store=True)
+    maintenance_cost_total = fields.Float(string='Coût total de maintenance', compute='_compute_maintenance_cost')
+    service_count = fields.Integer(string='Nombre de services', compute='_compute_service_count')
     service_activity = fields.Selection([
-        ('overdue', 'Overdue'),
-        ('today', 'Today'),
-        ('planned', 'Planned'),
-        ('none', 'None'),
-    ], string='Service Activity', compute='_compute_service_activity')
+        ('overdue', 'En retard'),
+        ('today', 'Aujourd\'hui'),
+        ('planned', 'Planifié'),
+        ('none', 'Aucun'),
+    ], string='Activité de service', compute='_compute_service_activity')
     
-    # Other Expenses
-    insurance_ids = fields.One2many('fleet.vehicle.insurance', 'vehicle_id', string='Insurance Records')
-    technical_inspection_ids = fields.One2many('fleet.vehicle.inspection', 'vehicle_id', string='Technical Inspections')
-    current_insurance_id = fields.Many2one('fleet.vehicle.insurance', string='Current Insurance',
-                                         compute='_compute_current_insurance')
+    # Autres dépenses
+    insurance_ids = fields.One2many('fleet.vehicle.insurance', 'vehicle_id', string='Enregistrements d\'assurance')
+    technical_inspection_ids = fields.One2many('fleet.vehicle.inspection', 'vehicle_id', string='Inspections techniques')
+    current_insurance_id = fields.Many2one('fleet.vehicle.insurance', string='Assurance actuelle', compute='_compute_current_insurance')
     
-    # Mileage Tracking
-    odometer_log_ids = fields.One2many('fleet.vehicle.odometer.log', 'vehicle_id', string='Odometer Logs')
-    last_odometer = fields.Float(string='Last Odometer Reading', compute='_compute_last_odometer')
-    daily_usage = fields.Float(string='Average Daily Usage (km)', compute='_compute_daily_usage')
+    # Suivi du kilométrage
+    odometer_log_ids = fields.One2many('fleet.vehicle.odometer.log', 'vehicle_id', string='Journaux du compteur kilométrique')
+    last_odometer = fields.Float(string='Dernière lecture du compteur kilométrique', compute='_compute_last_odometer')
+    daily_usage = fields.Float(string='Utilisation quotidienne moyenne (km)', compute='_compute_daily_usage')
     
     # Documents
     document_ids = fields.One2many('fleet.vehicle.document', 'vehicle_id', string='Documents')
-    document_count = fields.Integer(string='Document Count', compute='_compute_document_count')
+    document_count = fields.Integer(string='Nombre de documents', compute='_compute_document_count')
     
-    # Reservations
-    reservation_ids = fields.One2many('fleet.vehicle.reservation', 'vehicle_id', string='Reservations')
-    is_available = fields.Boolean(string='Available', compute='_compute_availability', store=True)
-    current_driver_id = fields.Many2one('fleet.driver', string='Current Driver',
-                                      compute='_compute_current_driver')
+    # Réservations
+    reservation_ids = fields.One2many('fleet.vehicle.reservation', 'vehicle_id', string='Réservations')
+    is_available = fields.Boolean(string='Disponible', compute='_compute_availability', store=True)
+    current_driver_id = fields.Many2one('fleet.driver', string='Conducteur actuel', compute='_compute_availability')
     
-    # Revenue Tracking
-    revenue_ids = fields.One2many('fleet.vehicle.revenue', 'vehicle_id', string='Revenue Records')
-    total_revenue = fields.Float(string='Total Revenue', compute='_compute_total_revenue')
-    profitability = fields.Float(string='Profitability (%)', compute='_compute_profitability', store=True)
+    maintenance_due = fields.Boolean(string="Maintenance due", compute="_compute_maintenance_due", store=True)
+
+    @api.depends("next_maintenance_date")
+    def _compute_maintenance_due(self):
+        today = fields.Date.today()
+        for vehicle in self:
+            vehicle.maintenance_due = vehicle.next_maintenance_date and vehicle.next_maintenance_date <= today
+
+    # Suivi des revenus
+    revenue_ids = fields.One2many('fleet.vehicle.revenue', 'vehicle_id', string='Enregistrements de revenus')
+    total_revenue = fields.Float(string='Revenu total', compute='_compute_total_revenue')
+    profitability = fields.Float(string='Rentabilité (%)', compute='_compute_profitability', store=True)
     
     @api.depends('fuel_log_ids', 'odometer_log_ids')
     def _compute_fuel_efficiency(self):
@@ -69,6 +75,50 @@ class FleetVehicle(models.Model):
                 lambda m: m.state == 'scheduled' and m.date > fields.Date.today()
             ).sorted('date')
             vehicle.next_maintenance_date = upcoming_maintenances[0].date if upcoming_maintenances else False
+
+    @api.depends('odometer_log_ids', 'odometer_log_ids.date', 'odometer_log_ids.value')
+    def _compute_daily_usage(self):
+        for vehicle in self:
+            logs = vehicle.odometer_log_ids.sorted('date')
+            if len(logs) >= 2:
+                # On convertit la date en objet date (si ce n'est pas déjà le cas)
+                first_date = fields.Date.from_string(logs[0].date)
+                last_date = fields.Date.from_string(logs[-1].date)
+                days = (last_date - first_date).days
+                if days > 0:
+                    vehicle.daily_usage = (logs[-1].value - logs[0].value) / days
+                else:
+                    vehicle.daily_usage = 0.0
+            else:
+                vehicle.daily_usage = 0.0
+
+    @api.depends('document_ids')
+    def _compute_document_count(self):
+        for vehicle in self:
+            vehicle.document_count = len(vehicle.document_ids)
+
+    @api.depends('fuel_log_ids')
+    def _compute_last_fuel_cost(self):
+        for vehicle in self:
+            # Si des logs de carburant existent, on prend le dernier log basé sur la date
+            if vehicle.fuel_log_ids:
+                sorted_logs = vehicle.fuel_log_ids.sorted(key=lambda l: l.date, reverse=True)
+                last_log = sorted_logs[0]
+                vehicle.last_fuel_cost = last_log.total_amount or 0.0
+            else:
+                vehicle.last_fuel_cost = 0.0
+
+
+    @api.depends('odometer_log_ids', 'odometer_log_ids.value')
+    def _compute_last_odometer(self):
+        for vehicle in self:
+            if vehicle.odometer_log_ids:
+                # Trier les logs par date décroissante pour récupérer le dernier
+                sorted_logs = vehicle.odometer_log_ids.sorted(key=lambda l: l.date, reverse=True)
+                vehicle.last_odometer = sorted_logs[0].value or 0.0
+            else:
+                vehicle.last_odometer = 0.0
+
 
     @api.depends('maintenance_log_ids.total_cost')
     def _compute_maintenance_cost(self):
@@ -100,6 +150,12 @@ class FleetVehicle(models.Model):
                 vehicle.current_driver_id = current_reservation[0].driver_id
             else:
                 vehicle.current_driver_id = False
+
+
+    @api.depends('revenue_ids', 'revenue_ids.amount')
+    def _compute_total_revenue(self):
+        for vehicle in self:
+            vehicle.total_revenue = sum(vehicle.revenue_ids.mapped('amount'))
             
     @api.depends('revenue_ids', 'revenue_ids.amount', 'maintenance_cost_total', 'fuel_log_ids', 'fuel_log_ids.total_amount')
     def _compute_profitability(self):
@@ -113,19 +169,19 @@ class FleetVehicle(models.Model):
                 vehicle.profitability = 0
             
     def action_schedule_maintenance(self):
-        # Action to schedule maintenance
+        # Action pour planifier la maintenance
         pass
         
     def action_create_reservation(self):
-        # Action to create new reservation
+        # Action pour créer une nouvelle réservation
         pass
         
     def action_view_documents(self):
-        # Action to view related documents
+        # Action pour voir les documents associés
         pass
         
     def action_report_analytics(self):
-        # Action to generate analytics report
+        # Action pour générer un rapport analytique
         pass
 
     @api.depends('maintenance_log_ids')
@@ -149,7 +205,7 @@ class FleetVehicle(models.Model):
                 vehicle.service_activity = 'planned'
 
     def return_action_to_open(self):
-        """ This opens the xml view specified in xml_id for the current vehicle """
+        """ Ouvre la vue xml spécifiée dans xml_id pour le véhicule actuel """
         self.ensure_one()
         xml_id = self._context.get('xml_id')
         if xml_id:

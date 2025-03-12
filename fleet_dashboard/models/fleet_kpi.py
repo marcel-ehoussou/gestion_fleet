@@ -46,7 +46,7 @@ class FleetKPI(models.Model):
         ('good', 'Good'),
         ('warning', 'Warning'),
         ('critical', 'Critical'),
-    ], string='Status', compute='_compute_current_value')
+    ], string='Status', compute='_compute_current_value', store=True)
     
     time_range = fields.Selection([
         ('daily', 'Daily'),

@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Document Form View -->
+        <!-- Vue Formulaire de Document -->
         <record id="fleet_document_view_form" model="ir.ui.view">
             <field name="name">fleet.vehicle.document.form</field>
             <field name="model">fleet.vehicle.document</field>
             <field name="arch" type="xml">
                 <form string="Document">
                     <header>
-                        <button name="action_renew" string="Renew" type="object" 
+                        <button name="action_renew" string="Renouveler" type="object" 
                                 class="oe_highlight" attrs="{'invisible': [('state', '!=', 'valid')]}"/>
-                        <button name="action_archive" string="Archive" type="object" 
+                        <button name="action_archive" string="Archiver" type="object" 
                                 attrs="{'invisible': [('active', '=', False)]}"/>
                         <field name="state" widget="statusbar" 
                                statusbar_visible="draft,valid,expired"/>
@@ -19,14 +19,14 @@
                         <div class="oe_button_box" name="button_box">
                             <button name="action_send_reminder" type="object" 
                                     class="oe_stat_button" icon="fa-bell">
-                                <span>Send Reminder</span>
+                                <span>Envoyer un rappel</span>
                             </button>
                         </div>
-                        <widget name="web_ribbon" title="Archived" bg_color="bg-danger" 
+                        <widget name="web_ribbon" title="Archivé" bg_color="bg-danger" 
                                 attrs="{'invisible': [('active', '=', True)]}"/>
                         <div class="oe_title">
                             <h1>
-                                <field name="name" placeholder="Document Name"/>
+                                <field name="name" placeholder="Nom du document"/>
                             </h1>
                         </div>
                         <group>
@@ -44,7 +44,7 @@
                             </group>
                         </group>
                         <notebook>
-                            <page string="Document Storage" name="storage">
+                            <page string="Stockage du document" name="storage">
                                 <group>
                                     <field name="attachment_ids" widget="many2many_binary"/>
                                     <field name="document_url" widget="url"/>
@@ -53,7 +53,7 @@
                                     <field name="notes" nolabel="1"/>
                                 </group>
                             </page>
-                            <page string="Reminders" name="reminders">
+                            <page string="Rappels" name="reminders">
                                 <field name="reminder_ids">
                                     <tree editable="bottom">
                                         <field name="reminder_type"/>
@@ -64,7 +64,7 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Renewal Information" name="renewal">
+                            <page string="Informations de renouvellement" name="renewal">
                                 <group>
                                     <group>
                                         <field name="renewal_cost"/>
@@ -84,7 +84,7 @@
             </field>
         </record>
 
-        <!-- Document Tree View -->
+        <!-- Vue Liste de Document -->
         <record id="fleet_document_view_tree" model="ir.ui.view">
             <field name="name">fleet.vehicle.document.tree</field>
             <field name="model">fleet.vehicle.document</field>
@@ -105,50 +105,50 @@
             </field>
         </record>
 
-        <!-- Document Search View -->
+        <!-- Vue Recherche de Document -->
         <record id="fleet_document_view_search" model="ir.ui.view">
             <field name="name">fleet.vehicle.document.search</field>
             <field name="model">fleet.vehicle.document</field>
             <field name="arch" type="xml">
-                <search string="Search Documents">
+                <search string="Rechercher des documents">
                     <field name="name"/>
                     <field name="reference"/>
                     <field name="vehicle_id"/>
                     <field name="driver_id"/>
                     <separator/>
-                    <filter string="Valid" name="valid" domain="[('state', '=', 'valid')]"/>
-                    <filter string="Expired" name="expired" domain="[('state', '=', 'expired')]"/>
-                    <filter string="Expiring Soon" name="expiring_soon" 
+                    <filter string="Valide" name="valid" domain="[('state', '=', 'valid')]"/>
+                    <filter string="Expiré" name="expired" domain="[('state', '=', 'expired')]"/>
+                    <filter string="Expirant bientôt" name="expiring_soon" 
                             domain="[('expiry_date', '&lt;=', (context_today() + datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
                                     ('expiry_date', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
                     <separator/>
-                    <filter string="Vehicle Documents" name="vehicle_docs" 
+                    <filter string="Documents de véhicule" name="vehicle_docs" 
                             domain="[('vehicle_id', '!=', False)]"/>
-                    <filter string="Driver Documents" name="driver_docs" 
+                    <filter string="Documents de conducteur" name="driver_docs" 
                             domain="[('driver_id', '!=', False)]"/>
-                    <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
-                    <group expand="0" string="Group By">
-                        <filter string="Document Type" name="group_by_type" 
+                    <filter string="Archivé" name="archived" domain="[('active', '=', False)]"/>
+                    <group expand="0" string="Grouper par">
+                        <filter string="Type de document" name="group_by_type" 
                                 context="{'group_by': 'document_type'}"/>
-                        <filter string="Vehicle" name="group_by_vehicle" 
+                        <filter string="Véhicule" name="group_by_vehicle" 
                                 context="{'group_by': 'vehicle_id'}"/>
-                        <filter string="Driver" name="group_by_driver" 
+                        <filter string="Conducteur" name="group_by_driver" 
                                 context="{'group_by': 'driver_id'}"/>
-                        <filter string="Status" name="group_by_state" 
+                        <filter string="Statut" name="group_by_state" 
                                 context="{'group_by': 'state'}"/>
-                        <filter string="Expiry Month" name="group_by_expiry" 
+                        <filter string="Mois d'expiration" name="group_by_expiry" 
                                 context="{'group_by': 'expiry_date:month'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
-        <!-- Document Calendar View -->
+        <!-- Vue Calendrier de Document -->
         <record id="fleet_document_view_calendar" model="ir.ui.view">
             <field name="name">fleet.vehicle.document.calendar</field>
             <field name="model">fleet.vehicle.document</field>
             <field name="arch" type="xml">
-                <calendar string="Document Deadlines" date_start="expiry_date" 
+                <calendar string="Échéances des documents" date_start="expiry_date" 
                          color="document_type" quick_add="false">
                     <field name="name"/>
                     <field name="reference"/>
@@ -158,7 +158,7 @@
             </field>
         </record>
 
-        <!-- Document Action Window -->
+        <!-- Action Fenêtre de Document -->
         <record id="action_fleet_document" model="ir.actions.act_window">
             <field name="name">Documents</field>
             <field name="res_model">fleet.vehicle.document</field>
@@ -166,26 +166,26 @@
             <field name="context">{'search_default_valid': 1, 'search_default_expiring_soon': 1}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Create your first document
+                    Créez votre premier document
                 </p>
                 <p>
-                    Manage all your vehicle and driver related documents,
-                    track expiry dates, and set up reminders.
+                    Gérez tous vos documents liés aux véhicules et aux conducteurs,
+                    suivez les dates d'expiration et configurez des rappels.
                 </p>
             </field>
         </record>
 
-        <!-- Menu Items -->
-        <menuitem id="menu_fleet_document"
+        <!-- Éléments de Menu -->
+        <!-- <menuitem id="menu_fleet_document"
                   name="Documents"
                   parent="menu_fleet_vehicle_root"
                   action="action_fleet_document"
                   sequence="60"/>
 
         <menuitem id="menu_fleet_document_expiring"
-                  name="Expiring Documents"
+                  name="Documents expirants"
                   parent="menu_fleet_vehicle_root"
                   action="action_fleet_document"
-                  sequence="61"/>
+                  sequence="61"/> -->
     </data>
 </odoo>

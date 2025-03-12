@@ -4,57 +4,57 @@ from datetime import datetime, timedelta
 
 class FleetDriver(models.Model):
     _name = 'fleet.driver'
-    _description = 'Fleet Driver'
+    _description = 'Conducteur de flotte'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(string='Name', required=True, tracking=True)
-    employee_id = fields.Many2one('hr.employee', string='Related Employee')
-    license_number = fields.Char(string='License Number', required=True, tracking=True)
+    name = fields.Char(string='Nom', required=True, tracking=True)
+    employee_id = fields.Many2one('hr.employee', string='Employé associé')
+    license_number = fields.Char(string='Numéro de permis', required=True, tracking=True)
     license_type = fields.Selection([
         ('a', 'Type A'),
         ('b', 'Type B'),
         ('c', 'Type C'),
         ('d', 'Type D'),
-    ], string='License Type', required=True)
-    license_expiry = fields.Date(string='License Expiry Date', required=True)
+    ], string='Type de permis', required=True)
+    license_expiry = fields.Date(string='Date d\'expiration du permis', required=True)
     
-    # Contact Information
-    phone = fields.Char(string='Phone')
+    # Informations de contact
+    phone = fields.Char(string='Téléphone')
     email = fields.Char(string='Email')
-    address = fields.Text(string='Address')
+    address = fields.Text(string='Adresse')
     
-    # Status and Availability
+    # Statut et disponibilité
     state = fields.Selection([
-        ('available', 'Available'),
-        ('driving', 'On Drive'),
-        ('off_duty', 'Off Duty'),
-        ('leave', 'On Leave'),
-    ], string='Status', default='available', tracking=True)
+        ('available', 'Disponible'),
+        ('driving', 'En conduite'),
+        ('off_duty', 'Hors service'),
+        ('leave', 'En congé'),
+    ], string='Statut', default='available', tracking=True)
     
-    # Assignments and Schedule
-    current_vehicle_id = fields.Many2one('fleet.vehicle', string='Current Vehicle',
+    # Affectations et planning
+    current_vehicle_id = fields.Many2one('fleet.vehicle', string='Véhicule actuel',
                                        compute='_compute_current_vehicle')
     reservation_ids = fields.One2many('fleet.vehicle.reservation', 'driver_id',
-                                    string='Vehicle Reservations')
+                                    string='Réservations de véhicules')
     schedule_ids = fields.One2many('fleet.driver.schedule', 'driver_id',
-                                 string='Work Schedule')
+                                 string='Planning de travail')
     
-    # Performance Metrics
-    total_distance = fields.Float(string='Total Distance Driven',
+    # Indicateurs de performance
+    total_distance = fields.Float(string='Distance totale parcourue',
                                 compute='_compute_total_distance')
-    fuel_efficiency_rating = fields.Float(string='Fuel Efficiency Rating',
+    fuel_efficiency_rating = fields.Float(string='Efficacité énergétique',
                                         compute='_compute_efficiency_rating')
-    accident_count = fields.Integer(string='Number of Accidents',
+    accident_count = fields.Integer(string='Nombre d\'accidents',
                                   compute='_compute_accident_count')
     
     # Documents
     document_ids = fields.One2many('fleet.driver.document', 'driver_id',
                                  string='Documents')
     
-    # Analytics
-    revenue_generated = fields.Float(string='Total Revenue Generated',
+    # Analyses
+    revenue_generated = fields.Float(string='Revenu total généré',
                                    compute='_compute_revenue')
-    performance_score = fields.Float(string='Performance Score',
+    performance_score = fields.Float(string='Score de performance',
                                    compute='_compute_performance_score')
 
     @api.depends('reservation_ids')
@@ -63,31 +63,47 @@ class FleetDriver(models.Model):
             current_reservation = driver.reservation_ids.filtered(
                 lambda r: r.state == 'ongoing'
             )
-            driver.current_vehicle_id = current_reservation.vehicle_id if current_reservation else False
+            # S'il y a plusieurs réservations, on peut choisir la première ou ajuster la logique
+            driver.current_vehicle_id = current_reservation and current_reservation[0].vehicle_id or False
 
     @api.depends('reservation_ids')
     def _compute_total_distance(self):
         for driver in self:
-            # Calculate total distance driven from reservations and odometer logs
-            pass
+            total = 0.0
+            # Supposons que chaque réservation a un champ 'distance'
+            for reservation in driver.reservation_ids:
+                total += getattr(reservation, 'distance', 0.0)
+            driver.total_distance = total
 
     @api.depends('reservation_ids')
     def _compute_efficiency_rating(self):
         for driver in self:
-            # Calculate efficiency based on fuel consumption and driving patterns
-            pass
+            # Logique à définir : ici on assigne simplement 0.0 par défaut
+            driver.fuel_efficiency_rating = 0.0
 
     @api.depends('performance_score', 'fuel_efficiency_rating')
     def _compute_performance_score(self):
         for driver in self:
-            # Calculate overall performance score
-            pass
+            # Logique à définir : ici on assigne simplement 0.0 par défaut
+            driver.performance_score = 0.0
+
+    @api.depends('document_ids')
+    def _compute_accident_count(self):
+        for driver in self:
+            # Logique à définir pour compter le nombre d'accidents
+            driver.accident_count = 0
+
+    @api.depends('reservation_ids')
+    def _compute_revenue(self):
+        for driver in self:
+            # Logique à définir pour calculer le revenu généré
+            driver.revenue_generated = 0.0
 
     @api.constrains('license_expiry')
     def _check_license_validity(self):
         for driver in self:
             if driver.license_expiry and driver.license_expiry < fields.Date.today():
-                raise UserError(_('Driver license has expired!'))
+                raise UserError(_('Le permis de conduire a expiré !'))
 
     def action_set_available(self):
         self.ensure_one()
@@ -98,13 +114,13 @@ class FleetDriver(models.Model):
         self.state = 'off_duty'
 
     def action_view_schedule(self):
-        # Action to view driver's schedule
+        # Action pour voir le planning du conducteur
         pass
 
     def action_view_performance_report(self):
-        # Action to view detailed performance report
+        # Action pour voir le rapport de performance détaillé
         pass
 
     def action_send_reminder(self):
-        # Action to send reminder about license renewal or other important dates
+        # Action pour envoyer un rappel concernant le renouvellement du permis ou d'autres dates importantes
         pass

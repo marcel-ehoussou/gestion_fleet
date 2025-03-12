@@ -22,3 +22,25 @@ access_fleet_document_manager,fleet.vehicle.document.manager,model_fleet_vehicle
 
 access_fleet_document_reminder_user,fleet.document.reminder.user,model_fleet_document_reminder,group_fleet_user,1,0,0,0
 access_fleet_document_reminder_manager,fleet.document.reminder.manager,model_fleet_document_reminder,group_fleet_manager,1,1,1,1
+
+access_fleet_fuel_log_user,fleet.vehicle.fuel.log.user,model_fleet_vehicle_fuel_log,group_fleet_user,1,0,0,0
+access_fleet_fuel_log_manager,fleet.vehicle.fuel.log.manager,model_fleet_vehicle_fuel_log,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_schedule_user,fleet.driver.schedule.user,model_fleet_driver_schedule,group_fleet_user,1,0,0,0
+access_fleet_driver_schedule_manager,fleet.driver.schedule.manager,model_fleet_driver_schedule,group_fleet_manager,1,1,1,1
+
+access_fleet_vehicle_insurance_user,fleet.vehicle.insurance.user,model_fleet_vehicle_insurance,group_fleet_user,1,0,0,0
+access_fleet_vehicle_insurance_manager,fleet.vehicle.insurance.manager,model_fleet_vehicle_insurance,group_fleet_manager,1,1,1,1
+
+access_fleet_vehicle_inspection_user,fleet.vehicle.inspection.user,model_fleet_vehicle_inspection,group_fleet_user,1,0,0,0
+access_fleet_vehicle_inspection_manager,fleet.vehicle.inspection.manager,model_fleet_vehicle_inspection,group_fleet_manager,1,1,1,1
+
+access_fleet_vehicle_odometer_log_user,fleet.vehicle.odometer.log.user,model_fleet_vehicle_odometer_log,group_fleet_user,1,0,0,0
+access_fleet_vehicle_odometer_log_manager,fleet.vehicle.odometer.log.manager,model_fleet_vehicle_odometer_log,group_fleet_manager,1,1,1,1
+
+access_fleet_vehicle_revenue_user,fleet.vehicle.revenue.user,model_fleet_vehicle_revenue,group_fleet_user,1,0,0,0
+access_fleet_vehicle_revenue_manager,fleet.vehicle.revenue.manager,model_fleet_vehicle_revenue,group_fleet_manager,1,1,1,1
+
+
+fleet_driver_document_user,fleet.driver.document.user,model_fleet_driver_document,group_fleet_user,1,0,0,0
+fleet_driver_document_manager,fleet.driver.document.manager,model_fleet_driver_document,group_fleet_manager,1,1,1,1
