@@ -1,6 +1,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 class FleetDocument(models.Model):
     _name = 'fleet.vehicle.document'
@@ -108,6 +109,73 @@ class FleetDocument(models.Model):
         ])
         for document in soon_to_expire:
             document.action_send_reminder()
+
+class FleetDriverDocument(models.Model):
+    _name = 'fleet.driver.document'
+    _description = 'Driver Document'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'expiry_date'
+
+    name = fields.Char(string='Document Name', required=True, tracking=True)
+    description = fields.Text(string='Description')
+    
+    # Document Details
+    driver_id = fields.Many2one('fleet.driver', string='Driver', required=True)
+    document_type = fields.Selection([
+        ('license', 'Driver License'),
+        ('permit', 'Special Permit'),
+        ('certification', 'Certification'),
+        ('training', 'Training Certificate'),
+        ('medical', 'Medical Certificate'),
+        ('other', 'Other'),
+    ], string='Document Type', required=True, tracking=True)
+    
+    issue_date = fields.Date(string='Issue Date', required=True, tracking=True)
+    expiry_date = fields.Date(string='Expiry Date', tracking=True)
+    
+    # Document Status
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('valid', 'Valid'),
+        ('expired', 'Expired'),
+        ('cancelled', 'Cancelled'),
+    ], string='Status', compute='_compute_state', store=True, tracking=True)
+    
+    active = fields.Boolean(default=True)
+    
+    # Document Storage
+    attachment_ids = fields.Many2many('ir.attachment', string='Attachments')
+    notes = fields.Text(string='Notes')
+    
+    @api.depends('expiry_date')
+    def _compute_state(self):
+        today = fields.Date.today()
+        for record in self:
+            if not record.expiry_date:
+                record.state = 'valid'
+            elif record.expiry_date < today:
+                record.state = 'expired'
+            else:
+                record.state = 'valid'
+
+    @api.constrains('issue_date', 'expiry_date')
+    def _check_dates(self):
+        for record in self:
+            if record.issue_date and record.expiry_date:
+                if record.expiry_date < record.issue_date:
+                    raise ValidationError(_('Expiry date cannot be before issue date'))
+
+    def action_set_draft(self):
+        self.ensure_one()
+        self.state = 'draft'
+
+    def action_cancel(self):
+        self.ensure_one()
+        self.state = 'cancelled'
+
+    def action_archive(self):
+        self.ensure_one()
+        self.active = False
 
 class FleetDocumentReminder(models.Model):
     _name = 'fleet.document.reminder'

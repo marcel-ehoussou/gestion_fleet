@@ -41,6 +41,15 @@ access_fleet_vehicle_odometer_log_manager,fleet.vehicle.odometer.log.manager,mod
 access_fleet_vehicle_revenue_user,fleet.vehicle.revenue.user,model_fleet_vehicle_revenue,group_fleet_user,1,0,0,0
 access_fleet_vehicle_revenue_manager,fleet.vehicle.revenue.manager,model_fleet_vehicle_revenue,group_fleet_manager,1,1,1,1
 
-
 fleet_driver_document_user,fleet.driver.document.user,model_fleet_driver_document,group_fleet_user,1,0,0,0
 fleet_driver_document_manager,fleet.driver.document.manager,model_fleet_driver_document,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_schedule_user,fleet.driver.schedule.user,model_fleet_driver_schedule,group_fleet_user,1,1,1,0
+access_fleet_driver_schedule_manager,fleet.driver.schedule.manager,model_fleet_driver_schedule,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_performance_report_user,fleet.driver.performance.report.user,model_fleet_driver_performance_report,group_fleet_user,1,1,1,0
+access_fleet_driver_performance_report_manager,fleet.driver.performance.report.manager,model_fleet_driver_performance_report,group_fleet_manager,1,1,1,1
+
+access_fleet_driver_document_user,fleet.driver.document.user,model_fleet_driver_document,group_fleet_user,1,1,1,0
+access_fleet_driver_document_manager,fleet.driver.document.manager,model_fleet_driver_document,group_fleet_manager,1,1,1,1
+
